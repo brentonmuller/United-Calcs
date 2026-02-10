@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tool Dashboard</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f7f6; display: flex; justify-content: center; padding: 50px; }
+        .container { max-width: 600px; width: 100%; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; text-align: center; }
+        .grid { display: grid; gap: 15px; margin-top: 20px; }
+        .card { 
+            padding: 20px; border: 1px solid #ddd; border-radius: 8px; 
+            text-decoration: none; color: #333; font-weight: bold;
+            transition: 0.3s; text-align: center; background: #fff;
+        }
+        .card:hover { background: #007bff; color: white; border-color: #007bff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>My Calculators</h1>
+        <div class="grid">
+            <a href="calculators/loan-calc/" class="card">💰 Loan Calculator</a>
+            <a href="calculators/bmi-calc/" class="card">⚖️ BMI Calculator</a>
+            <a href="calculators/health-calc/" class="card">🏥 Health Calculator</a>
+        </div>
+    </div>
+</body>
+</html>
