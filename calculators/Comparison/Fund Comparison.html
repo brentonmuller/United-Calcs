@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Strategic Wealth Projection 2026 - Data Verified</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --cbus-navy: #002e6d;
+            --cbus-green: #71B44D;
+            --cbus-light-gray: #f4f8fb;
+            --cbus-white: #ffffff;
+            --comp-red: #e53e3e;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--cbus-light-gray); color: #2c3e50; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: var(--cbus-white); padding: 40px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); border-top: 12px solid var(--cbus-navy); }
+        
+        .header { text-align: center; margin-bottom: 30px; position: relative; }
+        .logo-placeholder { font-size: 32px; font-weight: 900; color: var(--cbus-navy); letter-spacing: -1px; margin-bottom: 10px; }
+        .logo-placeholder span { color: var(--cbus-green); }
+        
+        .setup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; background: #fff; border: 1px solid #e2e8f0; padding: 25px; border-radius: 12px; }
+        .input-box label { display: block; font-size: 11px; font-weight: bold; margin-bottom: 8px; color: var(--cbus-navy); text-transform: uppercase; }
+        input, select { width: 100%; padding: 10px; border: 2px solid #cbd5e0; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+
+        .fund-comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+        .fund-pane { padding: 20px; border-radius: 12px; border: 3px solid #e2e8f0; background: #fff; }
+        .fund-pane.a { border-color: var(--cbus-navy); }
+        .fund-pane.b { border-color: var(--comp-red); }
+        .fund-pane h3 { margin-top: 0; color: var(--cbus-navy); }
+
+        button { width: 100%; padding: 20px; background: var(--cbus-navy); color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #004094; }
+
+        .chart-section { margin-top: 40px; padding: 20px; background: white; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .table-section { margin-top: 30px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: var(--cbus-navy); color: white; padding: 12px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #edf2f7; }
+        .bal-a { font-weight: bold; color: var(--cbus-navy); }
+        .bal-b { font-weight: bold; color: var(--comp-red); }
+        optgroup { font-weight: bold; color: var(--cbus-navy); font-style: normal; background: #f0f4f8; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="logo-placeholder">STRATEGIC <span>COMPARISON</span></div>
+        <p>Projected Wealth Analysis based on Longest Available Data Points (Dec 2025/Jan 2026)</p>
+    </div>
+
+    <div class="setup-grid">
+        <div class="input-box"><label>Current Age</label><input type="number" id="age" value="35"></div>
+        <div class="input-box"><label>Retirement Age</label><input type="number" id="retAge" value="67"></div>
+        <div class="input-box"><label>Current Balance ($)</label><input type="number" id="balance" value="100000"></div>
+        <div class="input-box"><label>Current Salary ($)</label><input type="number" id="salary" value="100000"></div>
+        <div class="input-box"><label>Employer SG (%)</label><input type="number" id="sgRate" value="12"></div>
+        <div class="input-box"><label>Sal Sacrifice ($ Annual)</label><input type="number" id="salSac" value="0"></div>
+        <div class="input-box"><label>Wage Inflation (%)</label><input type="number" id="wageInf" value="3.0"></div>
+    </div>
+
+    <div class="fund-comparison-grid">
+        <div class="fund-pane a">
+            <h3>Primary Choice</h3>
+            <label>Select Super Fund</label>
+            <select id="fundA" onchange="updateOptions('A')">
+                <option value="cbus">Cbus</option>
+                <option value="plum">Plum (MLC)</option>
+                <option value="ausSuper">AustralianSuper</option>
+                <option value="brighter">Brighter Super</option>
+                <option value="bussq">BUSSQ</option>
+            </select>
+            <label style="margin-top:10px; display:block;">Investment Option (By Data Availability)</label>
+            <select id="optA"></select>
+        </div>
+
+        <div class="fund-pane b">
+            <h3>Comparison Fund</h3>
+            <label>Select Super Fund</label>
+            <select id="fundB" onchange="updateOptions('B')">
+                <option value="plum">Plum (MLC)</option>
+                <option value="cbus">Cbus</option>
+                <option value="ausSuper">AustralianSuper</option>
+                <option value="brighter">Brighter Super</option>
+                <option value="bussq">BUSSQ</option>
+            </select>
+            <label style="margin-top:10px; display:block;">Investment Option (By Data Availability)</label>
+            <select id="optB"></select>
+        </div>
+    </div>
+
+    <button onclick="calculate()">GENERATE COMPARISON PROJECTION</button>
+
+    <div class="chart-section" id="chartArea" style="display:none;">
+        <canvas id="compChart"></canvas>
+    </div>
+
+    <div class="table-section" id="tableArea" style="display:none;">
+        <table id="resultsTable">
+            <thead>
+                <tr>
+                    <th>Age</th>
+                    <th>Salary</th>
+                    <th>Primary Fund Balance</th>
+                    <th>Comparison Fund Balance</th>
+                    <th>Difference</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+// Grouped Data based on longest available timeframe from provided CSVs
+const groupedData = {
+    cbus: {
+        "10 Years Data": [
+            { name: "High Growth", rate: 0.0965 },
+            { name: "Growth (MySuper)", rate: 0.0800 },
+            { name: "Conservative", rate: 0.0443 },
+            { name: "Cash", rate: 0.0195 }
+        ],
+        "5 Years Data": [
+            { name: "Conservative Growth", rate: 0.0531 }
+        ],
+        "3 Years Data": [
+            { name: "Overseas Shares", rate: 0.1898 },
+            { name: "Indexed Diversified", rate: 0.1198 },
+            { name: "Growth Plus", rate: 0.1103 },
+            { name: "Australian Shares", rate: 0.1089 },
+            { name: "Diversified Fixed Interest", rate: 0.0483 },
+            { name: "Property", rate: 0.0236 }
+        ]
+    },
+    plum: {
+        "10 Years Data": [
+            { name: "MLC Aggressive", rate: 0.1170 },
+            { name: "MLC High Growth", rate: 0.0950 },
+            { name: "MLC Growth", rate: 0.0830 },
+            { name: "MySuper Growth Portfolio", rate: 0.0750 },
+            { name: "MLC Balanced", rate: 0.0730 },
+            { name: "MLC Conservative Balanced", rate: 0.0600 },
+            { name: "MLC Stable", rate: 0.0440 }
+        ],
+        "5 Years Data": [
+            { name: "MySuper Conservative Balanced", rate: 0.0610 },
+            { name: "MySuper Cash Portfolio", rate: 0.0230 }
+        ]
+    },
+    ausSuper: {
+        "10 Years Data": [
+            { name: "International Shares", rate: 0.1102 },
+            { name: "Australian Shares", rate: 0.0993 },
+            { name: "High Growth", rate: 0.0884 },
+            { name: "Balanced", rate: 0.0794 },
+            { name: "Indexed Diversified", rate: 0.0761 },
+            { name: "Socially Aware", rate: 0.0713 },
+            { name: "Conservative Balanced", rate: 0.0623 },
+            { name: "Stable", rate: 0.0475 },
+            { name: "Cash", rate: 0.0203 },
+            { name: "Diversified Fixed Interest", rate: 0.0216 }
+        ]
+    },
+    brighter: {
+        "10 Years Data": [
+            { name: "Australian Shares", rate: 0.1040 },
+            { name: "MySuper", rate: 0.0795 },
+            { name: "Secure", rate: 0.0308 },
+            { name: "Cash", rate: 0.0227 }
+        ],
+        "7 Years Data": [
+            { name: "International Shares", rate: 0.1498 },
+            { name: "Growth", rate: 0.1058 },
+            { name: "Balanced", rate: 0.0909 },
+            { name: "Conservative Balanced", rate: 0.0704 },
+            { name: "Stable", rate: 0.0515 }
+        ],
+        "5 Years Data": [
+            { name: "Indexed Balanced", rate: 0.0875 },
+            { name: "Property", rate: 0.0416 },
+            { name: "Diversified Fixed Interest", rate: 0.0052 }
+        ]
+    },
+    bussq: {
+        "10 Years Data": [
+            { name: "Australian Small Companies", rate: 0.0975 },
+            { name: "International Shares", rate: 0.0837 },
+            { name: "Australian Shares", rate: 0.0822 },
+            { name: "High Growth", rate: 0.0780 },
+            { name: "International (Emg Mkts)", rate: 0.0709 },
+            { name: "Balanced Growth", rate: 0.0676 },
+            { name: "Defensive", rate: 0.0428 },
+            { name: "Cash", rate: 0.0195 }
+        ]
+    }
+};
+
+let chart = null;
+
+function updateOptions(pane) {
+    const fund = document.getElementById('fund' + pane).value;
+    const select = document.getElementById('opt' + pane);
+    select.innerHTML = '';
+    
+    for (const [groupName, options] of Object.entries(groupedData[fund])) {
+        const group = document.createElement('optgroup');
+        group.label = groupName;
+        options.forEach(o => {
+            const el = document.createElement('option');
+            el.value = o.rate;
+            el.textContent = `${o.name} (${(o.rate * 100).toFixed(2)}% p.a.)`;
+            group.appendChild(el);
+        });
+        select.appendChild(group);
+    }
+}
+
+function calculate() {
+    const age = parseInt(document.getElementById('age').value);
+    const retAge = parseInt(document.getElementById('retAge').value);
+    const sg = parseFloat(document.getElementById('sgRate').value) / 100;
+    const sSac = parseFloat(document.getElementById('salSac').value);
+    const wInf = parseFloat(document.getElementById('wageInf').value) / 100;
+    const rateA = parseFloat(document.getElementById('optA').value);
+    const rateB = parseFloat(document.getElementById('optB').value);
+    
+    let balA = parseFloat(document.getElementById('balance').value);
+    let balB = balA;
+    let sal = parseFloat(document.getElementById('salary').value);
+
+    let labels = [], pathA = [], pathB = [], rows = "";
+
+    for (let year = age; year <= retAge; year++) {
+        labels.push(year);
+        pathA.push(balA);
+        pathB.push(balB);
+
+        rows += `<tr>
+            <td>${year}</td>
+            <td>$${Math.round(sal).toLocaleString()}</td>
+            <td class="bal-a">$${Math.round(balA).toLocaleString()}</td>
+            <td class="bal-b">$${Math.round(balB).toLocaleString()}</td>
+            <td>$${Math.round(Math.abs(balA - balB)).toLocaleString()}</td>
+        </tr>`;
+
+        let annualContrib = ((sal * sg) + sSac) * 0.85; 
+        balA = (balA + (annualContrib / 2)) * (1 + rateA) + (annualContrib / 2);
+        balB = (balB + (annualContrib / 2)) * (1 + rateB) + (annualContrib / 2);
+        sal *= (1 + wInf);
+    }
+
+    document.getElementById('tableBody').innerHTML = rows;
+    document.getElementById('chartArea').style.display = 'block';
+    document.getElementById('tableArea').style.display = 'block';
+    renderChart(labels, pathA, pathB);
+}
+
+function renderChart(labels, dataA, dataB) {
+    const ctx = document.getElementById('compChart').getContext('2d');
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Primary Choice',
+                data: dataA,
+                borderColor: '#002e6d',
+                backgroundColor: 'rgba(0, 46, 109, 0.1)',
+                fill: true,
+                borderWidth: 3,
+                tension: 0.1
+            }, {
+                label: 'Comparison Fund',
+                data: dataB,
+                borderColor: '#e53e3e',
+                backgroundColor: 'rgba(229, 62, 62, 0.1)',
+                fill: true,
+                borderWidth: 3,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => `${ctx.dataset.label}: $${Math.round(ctx.parsed.y).toLocaleString()}`
+                    }
+                }
+            },
+            scales: { y: { ticks: { callback: v => '$' + v.toLocaleString() } } }
+        }
+    });
+}
+
+// Initialize
+updateOptions('A');
+updateOptions('B');
+</script>
+</body>
+</html>
