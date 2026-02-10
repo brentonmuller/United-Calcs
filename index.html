@@ -5,20 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CBUS Calculator Dashboard</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 40px 20px; }
+        :root { --cbus: #009354; } 
+        
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 40px 20px; margin: 0; }
+        
+        /* PIN Security Overlay */
+        #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(240, 244, 247, 0.98); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .pin-box { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid var(--cbus); }
+        .pin-input { font-size: 24px; width: 120px; text-align: center; letter-spacing: 8px; padding: 10px; border: 2px solid #ddd; border-radius: 8px; margin: 15px 0; outline: none; }
+        
+        /* Dashboard Container */
         .container { max-width: 500px; width: 100%; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         h1 { color: #1a1a1a; text-align: center; font-size: 24px; margin-bottom: 25px; }
-        .section-label { font-size: 12px; font-weight: bold; color: #888; text-transform: uppercase; margin: 20px 0 10px 5px; letter-spacing: 1px; }
+        .section-label { font-size: 12px; font-weight: bold; color: #666; text-transform: uppercase; margin: 20px 0 10px 5px; letter-spacing: 1px; }
         .grid { display: grid; gap: 12px; }
         .card { 
             padding: 18px; border: 1px solid #e1e4e8; border-radius: 10px; 
-            text-decoration: none; color: #007bff; font-weight: 500;
+            text-decoration: none; color: var(--cbus); font-weight: 500;
             transition: all 0.2s ease; background: #fff; display: block;
         }
-        .card:hover { background: #007bff; color: white; border-color: #007bff; transform: translateY(-2px); }
+        .card:hover { background: var(--cbus); color: white; border-color: var(--cbus); transform: translateY(-2px); }
     </style>
+    <script>
+        function checkPin() {
+            const pin = document.getElementById('pin-entry').value;
+            const correctPin = "01071984";
+            if (pin === correctPin) {
+                document.getElementById('auth-overlay').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            } else {
+                document.getElementById('pin-error').style.display = 'block';
+                document.getElementById('pin-entry').value = '';
+            }
+        }
+    </script>
 </head>
 <body>
+
+<div id="auth-overlay">
+    <div class="pin-box">
+        <h3 style="margin-top:0; color: var(--cbus);">Secure Access</h3>
+        <p style="font-size: 13px; color: #666;">Enter Admin PIN to continue</p>
+        <input type="password" id="pin-entry" class="pin-input" maxlength="8" placeholder="••••••••">
+        <br>
+        <button onclick="checkPin()" style="background: var(--cbus); color: white; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: bold;">Unlock Dashboard</button>
+        <div id="pin-error" style="color: red; font-size: 12px; margin-top: 10px; display: none;">Incorrect PIN</div>
+    </div>
+</div>
+
+<div id="main-content" style="display:none; width: 100%; max-width: 500px;">
     <div class="container">
         <h1>CBUS Calculators</h1>
         
@@ -35,6 +70,15 @@
                 📈 Investment Calculator
             </a>
         </div>
+
+        <div class="section-label">Comparison Tools</div>
+        <div class="grid">
+            <a href="calculators/Comparison/Fund Comparison.html" class="card">
+                ⚖️ Fund Comparison
+            </a>
+        </div>
     </div>
+</div>
+
 </body>
 </html>
