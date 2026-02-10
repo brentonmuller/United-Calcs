@@ -3,27 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tool Dashboard</title>
+    <title>CBUS Calculator Dashboard</title>
     <style>
-        body { font-family: sans-serif; background: #f4f7f6; display: flex; justify-content: center; padding: 50px; }
-        .container { max-width: 600px; width: 100%; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h1 { color: #333; text-align: center; }
-        .grid { display: grid; gap: 15px; margin-top: 20px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 40px 20px; }
+        .container { max-width: 500px; width: 100%; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        h1 { color: #1a1a1a; text-align: center; font-size: 24px; margin-bottom: 25px; }
+        .section-label { font-size: 12px; font-weight: bold; color: #888; text-transform: uppercase; margin: 20px 0 10px 5px; letter-spacing: 1px; }
+        .grid { display: grid; gap: 12px; }
         .card { 
-            padding: 20px; border: 1px solid #ddd; border-radius: 8px; 
-            text-decoration: none; color: #333; font-weight: bold;
-            transition: 0.3s; text-align: center; background: #fff;
+            padding: 18px; border: 1px solid #e1e4e8; border-radius: 10px; 
+            text-decoration: none; color: #007bff; font-weight: 500;
+            transition: all 0.2s ease; background: #fff; display: block;
         }
-        .card:hover { background: #007bff; color: white; border-color: #007bff; }
+        .card:hover { background: #007bff; color: white; border-color: #007bff; transform: translateY(-2px); }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>My Calculators</h1>
+        <h1>CBUS Calculators</h1>
+        
+        <div class="section-label">Retirement Tools</div>
         <div class="grid">
-            <a href="calculators/loan-calc/" class="card">💰 Loan Calculator</a>
-            <a href="calculators/bmi-calc/" class="card">⚖️ BMI Calculator</a>
-            <a href="calculators/health-calc/" class="card">🏥 Health Calculator</a>
+            <a href="calculators/Retirement/CBUS Super Retirement Calculator.html" class="card">
+                👴 Super Retirement Calculator
+            </a>
+        </div>
+
+        <div class="section-label">Investment Tools</div>
+        <div class="grid">
+            <a href="calculators/Accumulation/CBUS Investment Calculator.html" class="card">
+                📈 Investment Calculator
+            </a>
         </div>
     </div>
 </body>
