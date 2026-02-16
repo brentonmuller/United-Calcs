@@ -7,35 +7,26 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        :root { --navy: #002e6d; --green: #71B44D; --bg: #f4f8fb; --red: #e53e3e; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #2c3e50; padding: 20px; }
+        :root { --navy: #002e6d; --bg: #f4f8fb; --red: #e53e3e; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 20px; }
         .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-top: 10px solid var(--navy); }
-        .header { text-align: center; margin-bottom: 30px; }
         .setup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 30px; padding: 20px; background: #f9f9f9; border-radius: 8px; }
-        .input-box label { display: block; font-size: 11px; font-weight: bold; color: var(--navy); text-transform: uppercase; margin-bottom: 5px; }
+        .input-box label { display: block; font-size: 11px; font-weight: bold; color: var(--navy); margin-bottom: 5px; }
         input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
         .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
         .pane { padding: 20px; border: 2px solid #eee; border-radius: 10px; }
-        .pane.a { border-color: var(--navy); }
-        .pane.b { border-color: var(--red); }
-        button { width: 100%; padding: 15px; background: var(--navy); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
-        #status-msg { font-weight: bold; text-align: center; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
-        .error { background: #f2dede; color: #a94442; border: 1px solid #ebccd1; }
-        .loading { background: #d9edf7; color: #31708f; border: 1px solid #bce8f1; }
+        button { width: 100%; padding: 15px; background: var(--navy); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        #status { font-weight: bold; text-align: center; padding: 10px; margin-bottom: 10px; border-radius: 4px; }
+        .err { background: #f2dede; color: #a94442; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header">
-        <h1 style="color: var(--navy); margin:0;">STRATEGIC <span>PROJECTION TOOL</span></h1>
-        <p style="margin-top: 5px; font-size: 14px; color: #666;">Brenton Muller / United-Calcs</p>
-    </div>
-
-    <div id="status-msg" class="loading">Establishing connection to GitHub United-Calcs repo...</div>
+    <div id="status" style="background:#d9edf7; color:#31708f;">Syncing with United-Calcs Repository...</div>
 
     <div class="setup-grid">
-        <div class="input-box"><label>Current Age</label><input type="number" id="age" value="35"></div>
+        <div class="input-box"><label>Age</label><input type="number" id="age" value="35"></div>
         <div class="input-box"><label>Retire Age</label><input type="number" id="retAge" value="67"></div>
         <div class="input-box"><label>Balance ($)</label><input type="number" id="balance" value="100000"></div>
         <div class="input-box"><label>Salary ($)</label><input type="number" id="salary" value="100000"></div>
@@ -43,7 +34,7 @@
     </div>
 
     <div class="comparison-grid">
-        <div class="pane a">
+        <div class="pane">
             <h3>Primary Choice</h3>
             <select id="fundA" onchange="updateOptions('A')">
                 <option value="cbus_super">Cbus - Super</option>
@@ -57,11 +48,9 @@
                 <option value="bussq">BUSSQ</option>
                 <option value="plum">Plum (MLC)</option>
             </select>
-            <label style="margin-top:10px; display:block; font-size:12px;">Investment Option</label>
-            <select id="optA"><option>Loading...</option></select>
+            <select id="optA" style="margin-top:15px;"></select>
         </div>
-
-        <div class="pane b">
+        <div class="pane">
             <h3>Comparison Fund</h3>
             <select id="fundB" onchange="updateOptions('B')">
                 <option value="hostplus">Hostplus</option>
@@ -73,21 +62,19 @@
                 <option value="bussq">BUSSQ</option>
                 <option value="plum">Plum (MLC)</option>
             </select>
-            <label style="margin-top:10px; display:block; font-size:12px;">Investment Option</label>
-            <select id="optB"><option>Loading...</option></select>
+            <select id="optB" style="margin-top:15px;"></select>
         </div>
     </div>
 
     <button onclick="calculate()">GENERATE PROJECTION</button>
-    <div id="resultsArea" style="display:none; margin-top:30px;">
-        <canvas id="compChart"></canvas>
-    </div>
+    <canvas id="compChart" style="margin-top:30px;"></canvas>
 </div>
 
 <script>
-const USER = "brentonmuller"; 
+const USER = "brentonmuller";
 const REPO = "United-Calcs";
-const FOLDER = "calculators";
+// The baseUrl points to the folder containing the CSVs
+const baseUrl = `https://raw.githubusercontent.com/${USER}/${REPO}/main/calculators/`;
 
 const FILE_MAP = {
     cbus_super: "CBUS Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
@@ -106,72 +93,54 @@ let remoteData = {};
 let chart = null;
 
 async function init() {
-    const status = document.getElementById('status-msg');
-    
-    // Auto-detect branch (main vs master)
-    let branch = "main";
-    let testUrl = `https://raw.githubusercontent.com/${USER}/${REPO}/main/${FOLDER}/${encodeURIComponent(FILE_MAP.hostplus)}`;
-    let testReq = await fetch(testUrl);
-    if (!testReq.ok) {
-        branch = "master";
-        console.log("Main branch not found, trying master...");
-    }
-
-    const baseUrl = `https://raw.githubusercontent.com/${USER}/${REPO}/${branch}/${FOLDER}/`;
-    let count = 0;
-
+    let loaded = 0;
     for (let key in FILE_MAP) {
         try {
-            const response = await fetch(baseUrl + encodeURIComponent(FILE_MAP[key]));
-            if (response.ok) {
-                const csvText = await response.text();
-                const parsed = parseFlexibleCSV(csvText);
-                if (Object.values(parsed).some(a => a.length > 0)) {
-                    remoteData[key] = parsed;
-                    count++;
-                }
+            const res = await fetch(baseUrl + encodeURIComponent(FILE_MAP[key]));
+            if (res.ok) {
+                const csv = await res.text();
+                remoteData[key] = parseData(csv);
+                loaded++;
             }
-        } catch (e) { console.warn("Skip: " + key); }
+        } catch (e) { console.error("Error loading " + key); }
     }
 
-    if (count === 0) {
-        status.className = "error";
-        status.innerHTML = "❌ ACCESS DENIED: Ensure your GitHub Repo 'United-Calcs' is set to PUBLIC in Settings.";
+    if (loaded === 0) {
+        document.getElementById('status').innerHTML = "❌ DATA NOT FOUND: Ensure 'United-Calcs' is PUBLIC.";
+        document.getElementById('status').className = "err";
     } else {
-        status.style.display = 'none';
+        document.getElementById('status').style.display = 'none';
         updateOptions('A'); updateOptions('B');
     }
 }
 
-function parseFlexibleCSV(csv) {
+function parseData(csv) {
     const rows = Papa.parse(csv, { header: false, skipEmptyLines: true, relaxQuotes: true }).data;
     const groups = { "10yr": [], "5yr": [], "3yr": [], "1yr": [] };
-    let colIdx = { "10yr": -1, "5yr": -1, "3yr": -1, "1yr": -1 };
+    let cols = { "10yr": -1, "5yr": -1, "3yr": -1, "1yr": -1 };
 
-    // Column Finder
     rows.forEach(row => {
         row.forEach((cell, i) => {
             if (!cell) return;
             let c = cell.toString().toLowerCase();
-            if (c.includes("10 year") || c.includes("10 yr")) colIdx["10yr"] = i;
-            if (c.includes("5 year") || c.includes("5 yr")) colIdx["5yr"] = i;
-            if (c.includes("3 year") || c.includes("3 yr")) colIdx["3yr"] = i;
-            if (c.includes("1 year") || (c.includes("1 yr") && !c.includes("3 yr"))) colIdx["1yr"] = i;
+            if (c.includes("10 year") || c.includes("10 yr")) cols["10yr"] = i;
+            if (c.includes("5 year") || c.includes("5 yr")) cols["5yr"] = i;
+            if (c.includes("3 year") || c.includes("3 yr")) cols["3yr"] = i;
+            if (c.includes("1 year") || (c.includes("1 yr") && !c.includes("3 yr"))) cols["1yr"] = i;
         });
     });
 
-    // Row Extractor
     rows.forEach(row => {
-        let nameCell = row.find(c => c && c.length > 3 && isNaN(parseFloat(c.toString().replace('%',''))) && !c.toLowerCase().includes("year") && !c.toLowerCase().includes("mth"));
-        if (!nameCell) return;
+        let name = row.find(c => c && c.length > 3 && isNaN(parseFloat(c.toString().replace('%',''))) && !c.toLowerCase().includes("year") && !c.toLowerCase().includes("mth"));
+        if (!name) return;
 
         ["10yr", "5yr", "3yr", "1yr"].forEach(tf => {
-            if (colIdx[tf] !== -1 && row[colIdx[tf]]) {
-                let val = row[colIdx[tf]].toString().replace(/[^0-9.-]/g, '');
+            if (cols[tf] !== -1 && row[cols[tf]]) {
+                let val = row[cols[tf]].toString().replace(/[^0-9.-]/g, '');
                 let n = parseFloat(val);
                 if (!isNaN(n) && n !== 0) {
-                    let rate = (n > 0.5 || row[colIdx[tf]].toString().includes('%')) ? n / 100 : n;
-                    groups[tf].push({ name: nameCell.trim(), rate });
+                    let rate = (n > 0.5 || row[cols[tf]].toString().includes('%')) ? n / 100 : n;
+                    groups[tf].push({ name: name.trim(), rate });
                 }
             }
         });
@@ -180,18 +149,17 @@ function parseFlexibleCSV(csv) {
 }
 
 function updateOptions(pane) {
-    const fundKey = document.getElementById('fund' + pane).value;
+    const fund = document.getElementById('fund' + pane).value;
     const select = document.getElementById('opt' + pane);
     select.innerHTML = "";
-    const data = remoteData[fundKey];
-    if (!data) return;
-
+    if (!remoteData[fund]) return;
+    
     const seen = new Set();
     ["10yr", "5yr", "3yr", "1yr"].forEach(tf => {
-        if (data[tf].length > 0) {
+        if (remoteData[fund][tf].length > 0) {
             const grp = document.createElement('optgroup');
             grp.label = tf.replace('yr', ' Year Performance');
-            data[tf].forEach(o => {
+            remoteData[fund][tf].forEach(o => {
                 if (!seen.has(o.name)) {
                     const opt = document.createElement('option');
                     opt.value = o.rate;
@@ -208,29 +176,25 @@ function updateOptions(pane) {
 function calculate() {
     const age = parseInt(document.getElementById('age').value);
     const retAge = parseInt(document.getElementById('retAge').value);
-    const rateA = parseFloat(document.getElementById('optA').value);
-    const rateB = parseFloat(document.getElementById('optB').value);
-    
-    if (isNaN(rateA) || isNaN(rateB)) { alert("Please select an investment option for both funds."); return; }
-
-    let balA = parseFloat(document.getElementById('balance').value);
-    let balB = balA;
+    const rA = parseFloat(document.getElementById('optA').value);
+    const rB = parseFloat(document.getElementById('optB').value);
+    let bA = parseFloat(document.getElementById('balance').value);
+    let bB = bA;
     let sal = parseFloat(document.getElementById('salary').value);
     let sg = parseFloat(document.getElementById('sgRate').value) / 100;
+    
     let labels = [], pathA = [], pathB = [];
-
     for (let y = age; y <= retAge; y++) {
-        labels.push(y); pathA.push(balA); pathB.push(balB);
-        let contrib = (sal * sg) * 0.85; 
-        balA = (balA + contrib/2) * (1 + rateA) + contrib/2;
-        balB = (balB + contrib/2) * (1 + rateB) + contrib/2;
+        labels.push(y); pathA.push(bA); pathB.push(bB);
+        let con = (sal * sg) * 0.85; 
+        bA = (bA + con/2) * (1 + rA) + con/2;
+        bB = (bB + con/2) * (1 + rB) + con/2;
         sal *= 1.03;
     }
-    document.getElementById('resultsArea').style.display = 'block';
     renderChart(labels, pathA, pathB);
 }
 
-function renderChart(labels, dataA, dataB) {
+function renderChart(labels, dA, dB) {
     const ctx = document.getElementById('compChart').getContext('2d');
     if (chart) chart.destroy();
     chart = new Chart(ctx, {
@@ -238,13 +202,11 @@ function renderChart(labels, dataA, dataB) {
         data: {
             labels,
             datasets: [
-                { label: 'Primary Fund', data: dataA, borderColor: '#002e6d', fill: false, tension: 0.1 },
-                { label: 'Comparison Fund', data: dataB, borderColor: '#e53e3e', fill: false, tension: 0.1 }
+                { label: 'Primary', data: dA, borderColor: '#002e6d', fill: false },
+                { label: 'Comparison', data: dB, borderColor: '#e53e3e', fill: false }
             ]
         },
-        options: {
-            scales: { y: { ticks: { callback: v => '$' + v.toLocaleString() } } }
-        }
+        options: { scales: { y: { ticks: { callback: v => '$' + v.toLocaleString() } } } }
     });
 }
 init();
