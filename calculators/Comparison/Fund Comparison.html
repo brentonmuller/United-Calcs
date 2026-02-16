@@ -73,12 +73,12 @@
     <div class="fund-comparison-grid">
         <div class="fund-pane a">
             <h3>Primary Choice</h3>
-            <label>Select Account Type</label>
+            <label>Select Fund Type</label>
             <select id="fundA" onchange="updateOptions('A')">
-                <option value="cbus_super">CBUS - Super (MySuper)</option>
-                <option value="cbus_ttr">CBUS - Transition to Retirement</option>
-                <option value="cbus_retired">CBUS - Fully Retired</option>
-                <option value="aus_super">AustralianSuper</option>
+                <option value="cbus">Cbus - Super</option>
+                <option value="cbus_ttr">Cbus - TTR</option>
+                <option value="cbus_retired">Cbus - Fully Retired</option>
+                <option value="ausSuper">AustralianSuper</option>
                 <option value="aware">Aware Super</option>
                 <option value="art">ART</option>
                 <option value="hostplus">Hostplus</option>
@@ -86,26 +86,26 @@
                 <option value="bussq">BUSSQ</option>
                 <option value="plum">Plum (MLC)</option>
             </select>
-            <label style="margin-top:10px; display:block;">Investment Option (By Longest Available)</label>
+            <label style="margin-top:10px; display:block;">Investment Option (Sorted by History)</label>
             <select id="optA"></select>
         </div>
 
         <div class="fund-pane b">
             <h3>Comparison Fund</h3>
-            <label>Select Account Type</label>
+            <label>Select Fund Type</label>
             <select id="fundB" onchange="updateOptions('B')">
                 <option value="hostplus">Hostplus</option>
-                <option value="cbus_super">CBUS - Super (MySuper)</option>
-                <option value="cbus_ttr">CBUS - Transition to Retirement</option>
-                <option value="cbus_retired">CBUS - Fully Retired</option>
-                <option value="aus_super">AustralianSuper</option>
+                <option value="cbus">Cbus - Super</option>
+                <option value="cbus_ttr">Cbus - TTR</option>
+                <option value="cbus_retired">Cbus - Fully Retired</option>
+                <option value="ausSuper">AustralianSuper</option>
                 <option value="aware">Aware Super</option>
                 <option value="art">ART</option>
                 <option value="brighter">Brighter Super</option>
                 <option value="bussq">BUSSQ</option>
                 <option value="plum">Plum (MLC)</option>
             </select>
-            <label style="margin-top:10px; display:block;">Investment Option (By Longest Available)</label>
+            <label style="margin-top:10px; display:block;">Investment Option (Sorted by History)</label>
             <select id="optB"></select>
         </div>
     </div>
@@ -135,18 +135,18 @@
 <script>
 /**
  * GITHUB CONFIGURATION
- * Replace these placeholder values with your specific repository details
+ * REPLACE THESE WITH YOUR EXACT GITHUB DETAILS
  */
 const GITHUB_CONFIG = {
-    user: "brentonmuller", 
-    repo: "United-Calcs",
+    user: "YOUR_USERNAME", 
+    repo: "YOUR_REPO_NAME",
     branch: "main",
     folder: "calculators"
 };
 
-// Map internal IDs to exact CSV filenames for the three CBUS types and other funds
+// Map the dropdown "value" to the exact filenames on GitHub
 const FUND_FILE_MAP = {
-    cbus_super: "CBUS Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
+    cbus: "CBUS Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
     cbus_ttr: "CBUS TTR Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
     cbus_retired: "CBUS Fully Retired Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
     hostplus: "Hostplus 31 Jan 26.xlsx - Sheet1.csv",
@@ -154,7 +154,7 @@ const FUND_FILE_MAP = {
     art: "ART 31 Jan 26.xlsx - Sheet1.csv",
     plum: "Plum Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
     bussq: "BUSSQ Investment Returns 31 Dec 25.xlsx - Sheet1.csv",
-    aus_super: "Aus Super Returns 30 June 25.xlsx - Sheet1.csv",
+    ausSuper: "Aus Super Returns 30 June 25.xlsx - Sheet1.csv",
     brighter: "Brighter Investment returns 31 Jan 26.xlsx - Sheet1.csv"
 };
 
@@ -166,12 +166,14 @@ async function init() {
     
     const fetchPromises = Object.entries(FUND_FILE_MAP).map(async ([key, fileName]) => {
         try {
-            const response = await fetch(baseUrl + encodeURIComponent(fileName));
-            if (!response.ok) throw new Error(`Not found: ${fileName}`);
+            // Encode filename to handle spaces/special characters
+            const url = baseUrl + encodeURIComponent(fileName);
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Fetch failed for ${fileName}`);
             const csvText = await response.text();
             remoteData[key] = processCSV(csvText);
         } catch (err) {
-            console.warn(`Could not load ${fileName}:`, err);
+            console.error(err);
         }
     });
 
@@ -182,14 +184,14 @@ async function init() {
 }
 
 /**
- * Parses CSV and sorts options into groups based on the longest available date range
+ * Robust CSV Parser for various Australian Super Fund formats
  */
 function processCSV(csvText) {
     const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
-    const data = parsed.data;
+    let rows = parsed.data;
     const headers = parsed.meta.fields;
 
-    const grouped = {
+    const groups = {
         "10 Years Data": [],
         "7 Years Data": [],
         "5 Years Data": [],
@@ -197,39 +199,66 @@ function processCSV(csvText) {
         "1 Year Data": []
     };
 
-    const timeframeMap = [
-        { label: "10 Years Data", keys: ["10 years", "10 yrs", "10 yr"] },
-        { label: "7 Years Data",  keys: ["7 years", "7 yrs", "7 yr"] },
-        { label: "5 Years Data",  keys: ["5 years", "5 yrs", "5 yr"] },
-        { label: "3 Years Data",  keys: ["3 years", "3 yrs", "3 yr"] },
+    // Variations in headers across different spreadsheets
+    const timeframes = [
+        { label: "10 Years Data", keys: ["10 year", "10 yr"] },
+        { label: "7 Years Data",  keys: ["7 year", "7 yr"] },
+        { label: "5 Years Data",  keys: ["5 year", "5 yr"] },
+        { label: "3 Years Data",  keys: ["3 year", "3 yr"] },
         { label: "1 Year Data",   keys: ["1 year", "1 yr"] }
     ];
 
-    data.forEach(row => {
-        // Investment name is typically the first key in the row
-        const firstHeader = headers[0];
-        const name = row[firstHeader];
-        if (!name || name.trim() === "" || name.includes("Ready-made") || name.includes("Single asset")) return;
+    rows.forEach(row => {
+        // Find the "Investment Name" column dynamically
+        let name = null;
+        for (let h of headers) {
+            let val = row[h];
+            if (val && typeof val === 'string' && val.trim().length > 2 && !val.includes('%')) {
+                // Ignore general headers or units
+                if (!["investment option", "investment name", "superannuation options"].includes(val.toLowerCase().trim())) {
+                    name = val.trim();
+                    break;
+                }
+            }
+        }
 
-        for (const timeframe of timeframeMap) {
+        if (!name) return;
+
+        // Try to find a rate for each timeframe, starting with the longest
+        for (const tf of timeframes) {
             const matchingHeader = headers.find(h => 
-                timeframe.keys.some(k => h.toLowerCase().includes(k))
+                tf.keys.some(k => h.toLowerCase().includes(k)) && !h.toLowerCase().includes("financial")
             );
 
             if (matchingHeader) {
-                let val = row[matchingHeader];
-                if (val && val !== "-" && !val.toString().toLowerCase().includes("n/a")) {
-                    const rate = parseFloat(val.toString().replace('%', '')) / (val.toString().includes('%') ? 100 : 1);
-                    if (!isNaN(rate)) {
-                        grouped[timeframe.label].push({ name: name.trim(), rate: rate });
-                        break; // Assign to the longest timeframe found and move to next row
-                    }
+                let rateVal = row[matchingHeader];
+                let rate = parseRate(rateVal);
+                
+                if (!isNaN(rate)) {
+                    groups[tf.label].push({ name: name, rate: rate });
+                    break; // Found the longest available history for this row
                 }
             }
         }
     });
 
-    return grouped;
+    return groups;
+}
+
+/**
+ * Normalizes rates whether they are decimals (0.08) or strings (8.0% pa)
+ */
+function parseRate(val) {
+    if (!val || val === "-" || val.toString().toLowerCase().includes("n/a")) return NaN;
+    let s = val.toString().trim();
+    let isPercentStr = s.includes('%');
+    let num = parseFloat(s.replace(/[^0-9.-]/g, ''));
+    if (isNaN(num)) return NaN;
+    
+    // Logic: If it has a % sign OR is a whole number like 7.94, it's a percentage (divide by 100)
+    // If it's already a decimal like 0.08, keep it.
+    if (isPercentStr || num > 0.5) return num / 100;
+    return num;
 }
 
 function updateOptions(pane) {
@@ -240,12 +269,14 @@ function updateOptions(pane) {
     const fundData = remoteData[fund];
     if (!fundData) {
         const opt = document.createElement('option');
-        opt.textContent = "Data Syncing...";
+        opt.textContent = "Unable to load data from GitHub";
         select.appendChild(opt);
         return;
     }
 
     const order = ["10 Years Data", "7 Years Data", "5 Years Data", "3 Years Data", "1 Year Data"];
+    let hasOptions = false;
+
     order.forEach(groupName => {
         if (fundData[groupName] && fundData[groupName].length > 0) {
             const group = document.createElement('optgroup');
@@ -257,8 +288,15 @@ function updateOptions(pane) {
                 group.appendChild(el);
             });
             select.appendChild(group);
+            hasOptions = true;
         }
     });
+
+    if (!hasOptions) {
+        const opt = document.createElement('option');
+        opt.textContent = "No valid return data found in file";
+        select.appendChild(opt);
+    }
 }
 
 function calculate() {
@@ -270,6 +308,11 @@ function calculate() {
     const rateA = parseFloat(document.getElementById('optA').value);
     const rateB = parseFloat(document.getElementById('optB').value);
     
+    if (isNaN(rateA) || isNaN(rateB)) {
+        alert("Please select valid investment options for both funds.");
+        return;
+    }
+
     let balA = parseFloat(document.getElementById('balance').value);
     let balB = balA;
     let sal = parseFloat(document.getElementById('salary').value);
@@ -331,5 +374,4 @@ function renderChart(labels, dataA, dataB) {
 init();
 </script>
 </body>
-
 </html>
