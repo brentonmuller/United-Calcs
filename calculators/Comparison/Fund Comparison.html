@@ -2,209 +2,317 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Strategic Wealth Projection 2026</title>
-    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <title>Strategic Wealth Projection 2026 - Updated Data</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        :root { --navy: #002e6d; --bg: #f4f8fb; --red: #e53e3e; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 20px; color: #333; }
-        .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-top: 10px solid var(--navy); }
-        .setup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 30px; background: #f9f9f9; padding: 20px; border-radius: 8px; }
-        .input-box label { display: block; font-size: 11px; font-weight: bold; color: var(--navy); text-transform: uppercase; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
-        .pane { padding: 20px; border: 2px solid #eee; border-radius: 10px; }
-        .pane.a { border-left: 5px solid var(--navy); }
-        .pane.b { border-left: 5px solid var(--red); }
-        button { width: 100%; padding: 15px; background: var(--navy); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        #status-log { margin-top: 20px; padding: 15px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; font-size: 12px; max-height: 150px; overflow-y: auto; }
-        .success { color: green; } .fail { color: red; }
+        :root {
+            --cbus-navy: #002e6d;
+            --cbus-green: #71B44D;
+            --cbus-light-gray: #f4f8fb;
+            --cbus-white: #ffffff;
+            --comp-red: #e53e3e;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--cbus-light-gray); color: #2c3e50; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: var(--cbus-white); padding: 40px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); border-top: 12px solid var(--cbus-navy); }
+        
+        .header { text-align: center; margin-bottom: 30px; position: relative; }
+        .logo-placeholder { font-size: 32px; font-weight: 900; color: var(--cbus-navy); letter-spacing: -1px; margin-bottom: 10px; }
+        .logo-placeholder span { color: var(--cbus-green); }
+        
+        .setup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; background: #fff; border: 1px solid #e2e8f0; padding: 25px; border-radius: 12px; }
+        .input-box label { display: block; font-size: 11px; font-weight: bold; margin-bottom: 8px; color: var(--cbus-navy); text-transform: uppercase; }
+        input, select { width: 100%; padding: 10px; border: 2px solid #cbd5e0; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+
+        .fund-comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+        .fund-pane { padding: 20px; border-radius: 12px; border: 3px solid #e2e8f0; background: #fff; }
+        .fund-pane.a { border-color: var(--cbus-navy); }
+        .fund-pane.b { border-color: var(--comp-red); }
+        .fund-pane h3 { margin-top: 0; color: var(--cbus-navy); }
+
+        button { width: 100%; padding: 20px; background: var(--cbus-navy); color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #004094; }
+
+        .chart-section { margin-top: 40px; padding: 20px; background: white; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .table-section { margin-top: 30px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: var(--cbus-navy); color: white; padding: 12px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #edf2f7; }
+        .bal-a { font-weight: bold; color: var(--cbus-navy); }
+        .bal-b { font-weight: bold; color: var(--comp-red); }
+        optgroup { font-weight: bold; color: var(--cbus-navy); font-style: normal; background: #f0f4f8; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 style="text-align:center; color: var(--navy);">United-Calcs Projection Tool</h2>
-    
-    <div class="setup-grid">
-        <div class="input-box"><label>Age</label><input type="number" id="age" value="35"></div>
-        <div class="input-box"><label>Retire Age</label><input type="number" id="retAge" value="67"></div>
-        <div class="input-box"><label>Current $</label><input type="number" id="balance" value="100000"></div>
-        <div class="input-box"><label>Salary $</label><input type="number" id="salary" value="100000"></div>
-        <div class="input-box"><label>SG %</label><input type="number" id="sgRate" value="12"></div>
+    <div class="header">
+        <div class="logo-placeholder">STRATEGIC <span>COMPARISON</span></div>
+        <p>Projected Wealth Analysis based on Data Verified as of Jan 2026</p>
     </div>
 
-    <div class="comparison-grid">
-        <div class="pane a">
+    <div class="setup-grid">
+        <div class="input-box"><label>Current Age</label><input type="number" id="age" value="35"></div>
+        <div class="input-box"><label>Retirement Age</label><input type="number" id="retAge" value="67"></div>
+        <div class="input-box"><label>Current Balance ($)</label><input type="number" id="balance" value="100000"></div>
+        <div class="input-box"><label>Current Salary ($)</label><input type="number" id="salary" value="100000"></div>
+        <div class="input-box"><label>Employer SG (%)</label><input type="number" id="sgRate" value="12"></div>
+        <div class="input-box"><label>Sal Sacrifice ($ Annual)</label><input type="number" id="salSac" value="0"></div>
+        <div class="input-box"><label>Wage Inflation (%)</label><input type="number" id="wageInf" value="3.0"></div>
+    </div>
+
+    <div class="fund-comparison-grid">
+        <div class="fund-pane a">
             <h3>Primary Choice</h3>
+            <label>Select Super Fund</label>
             <select id="fundA" onchange="updateOptions('A')">
-                <option value="cbus_super">Cbus - Super</option>
-                <option value="aus_super">AustralianSuper</option>
-                <option value="hostplus">Hostplus</option>
-                <option value="aware">Aware Super</option>
+                <option value="cbus">Cbus (Super)</option>
+                <option value="cbusTTR">Cbus (TTR)</option>
+                <option value="cbusRetired">Cbus (Fully Retired)</option>
                 <option value="art">ART</option>
+                <option value="ausSuper">AustralianSuper</option>
+                <option value="aware">Aware Super</option>
+                <option value="brighter">Brighter Super</option>
                 <option value="bussq">BUSSQ</option>
+                <option value="hostplus">Hostplus</option>
+                <option value="plum">Plum (MLC)</option>
             </select>
-            <select id="optA" style="margin-top:15px;"><option>Waiting for data...</option></select>
+            <label style="margin-top:10px; display:block;">Investment Option</label>
+            <select id="optA"></select>
         </div>
-        <div class="pane b">
+
+        <div class="fund-pane b">
             <h3>Comparison Fund</h3>
+            <label>Select Super Fund</label>
             <select id="fundB" onchange="updateOptions('B')">
                 <option value="hostplus">Hostplus</option>
-                <option value="aus_super">AustralianSuper</option>
-                <option value="cbus_super">Cbus - Super</option>
-                <option value="aware">Aware Super</option>
                 <option value="art">ART</option>
+                <option value="ausSuper">AustralianSuper</option>
+                <option value="aware">Aware Super</option>
+                <option value="brighter">Brighter Super</option>
                 <option value="bussq">BUSSQ</option>
+                <option value="cbus">Cbus (Super)</option>
+                <option value="plum">Plum (MLC)</option>
             </select>
-            <select id="optB" style="margin-top:15px;"><option>Waiting for data...</option></select>
+            <label style="margin-top:10px; display:block;">Investment Option</label>
+            <select id="optB"></select>
         </div>
     </div>
 
-    <button onclick="calculate()">RUN PROJECTION</button>
-    
-    <div id="status-log"><strong>System Log:</strong><br></div>
-    
-    <div id="resultsArea" style="display:none; margin-top:30px;">
+    <button onclick="calculate()">GENERATE COMPARISON PROJECTION</button>
+
+    <div class="chart-section" id="chartArea" style="display:none;">
         <canvas id="compChart"></canvas>
+    </div>
+
+    <div class="table-section" id="tableArea" style="display:none;">
+        <table id="resultsTable">
+            <thead>
+                <tr>
+                    <th>Age</th>
+                    <th>Salary</th>
+                    <th>Primary Fund Balance</th>
+                    <th>Comparison Fund Balance</th>
+                    <th>Difference</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
     </div>
 </div>
 
 <script>
-const USER = "brentonmuller";
-const REPO = "United-Calcs";
-const DATA_URL = `https://raw.githubusercontent.com/${USER}/${REPO}/main/calculators/`;
-
-const FILE_MAP = {
-    cbus_super: "CBUS Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
-    hostplus: "Hostplus 31 Jan 26.xlsx - Sheet1.csv",
-    aware: "Aware 31 Jan 26.xlsx - Sheet1.csv",
-    art: "ART 31 Jan 26.xlsx - Sheet1.csv",
-    bussq: "BUSSQ Investment Returns 31 Dec 25.xlsx - Sheet1.csv",
-    aus_super: "Aus Super Returns 30 June 25.xlsx - Sheet1.csv"
+// Data updated from provided Jan 2026 CSV reports
+const groupedData = {
+    cbus: {
+        "10 Year Performance": [
+            { name: "High Growth", rate: 0.1005 }, //
+            { name: "Growth (MySuper)", rate: 0.0834 }, //
+            { name: "Conservative Growth", rate: 0.0638 }, //
+            { name: "Conservative", rate: 0.0463 }, //
+            { name: "Cash", rate: 0.0210 } //
+        ],
+        "3 Year Performance": [
+            { name: "Overseas Shares", rate: 0.1709 }, //
+            { name: "Australian Shares", rate: 0.1105 } //
+        ]
+    },
+    cbusTTR: {
+        "10 Year Performance": [
+            { name: "High Growth", rate: 0.0988 }, //
+            { name: "Growth", rate: 0.0818 }, //
+            { name: "Conservative", rate: 0.0441 } //
+        ]
+    },
+    cbusRetired: {
+        "10 Year Performance": [
+            { name: "High Growth", rate: 0.1118 }, //
+            { name: "Growth", rate: 0.0911 }, //
+            { name: "Conservative", rate: 0.0503 } //
+        ]
+    },
+    art: {
+        "10 Year Performance": [
+            { name: "High Growth", rate: 0.0980 }, //
+            { name: "Growth", rate: 0.0890 }, //
+            { name: "Balanced", rate: 0.0820 }, //
+            { name: "Socially Responsible", rate: 0.0820 } //
+        ]
+    },
+    ausSuper: {
+        "10 Year Performance": [
+            { name: "International Shares", rate: 0.1102 }, //
+            { name: "Australian Shares", rate: 0.0993 }, //
+            { name: "High Growth", rate: 0.0884 }, //
+            { name: "Balanced", rate: 0.0794 }, //
+            { name: "Stable", rate: 0.0475 } //
+        ]
+    },
+    aware: {
+        "10 Year Performance": [
+            { name: "High Growth", rate: 0.0954 }, //
+            { name: "Growth (MySuper)", rate: 0.0861 }, //
+            { name: "Socially Conscious", rate: 0.0818 }, //
+            { name: "Balanced", rate: 0.0773 } //
+        ]
+    },
+    hostplus: {
+        "10 Year Performance": [
+            { name: "Shares Plus", rate: 0.1013 }, //
+            { name: "Balanced (MySuper)", rate: 0.0881 }, //
+            { name: "Socially Responsible", rate: 0.0863 }, //
+            { name: "Indexed Balanced", rate: 0.0768 } //
+        ]
+    },
+    brighter: {
+        "10 Year Performance": [
+            { name: "Australian Shares", rate: 0.1040 }, //
+            { name: "MySuper", rate: 0.0795 }, //
+            { name: "Secure", rate: 0.0308 } //
+        ]
+    },
+    bussq: {
+        "10 Year Performance": [
+            { name: "Australian Small Co", rate: 0.1040 }, //
+            { name: "International Shares", rate: 0.0910 }, //
+            { name: "Australian Shares", rate: 0.0874 }, //
+            { name: "High Growth", rate: 0.0837 }, //
+            { name: "Balanced Growth", rate: 0.0734 } //
+        ]
+    },
+    plum: {
+        "10 Year Performance": [
+            { name: "MLC Aggressive", rate: 0.1160 }, //
+            { name: "MLC High Growth", rate: 0.0960 }, //
+            { name: "MLC Growth", rate: 0.0850 }, //
+            { name: "MySuper Growth", rate: 0.0770 }, //
+            { name: "MLC Balanced", rate: 0.0740 } //
+        ]
+    }
 };
 
-let remoteData = {};
 let chart = null;
-
-async function init() {
-    const log = document.getElementById('status-log');
-    
-    for (let key in FILE_MAP) {
-        try {
-            const fullUrl = DATA_URL + encodeURIComponent(FILE_MAP[key]);
-            const response = await fetch(fullUrl);
-            
-            if (!response.ok) {
-                log.innerHTML += `<span class="fail">❌ Could not find: ${FILE_MAP[key]}</span><br>`;
-                continue;
-            }
-
-            const csvText = await response.text();
-            // relaxQuotes: true solves the "Illegal Quoting" issue from Excel
-            const parsed = Papa.parse(csvText, { header: false, skipEmptyLines: true, relaxQuotes: true });
-            
-            remoteData[key] = processCSV(parsed.data);
-            log.innerHTML += `<span class="success">✅ Loaded: ${key} (${remoteData[key].length} options)</span><br>`;
-            
-        } catch (e) {
-            log.innerHTML += `<span class="fail">⚠️ Error parsing ${key}</span><br>`;
-        }
-    }
-    updateOptions('A'); updateOptions('B');
-}
-
-function processCSV(rows) {
-    let options = [];
-    let col10yr = -1;
-
-    // 1. Find the 10yr Column
-    rows.forEach(row => {
-        row.forEach((cell, i) => {
-            if (!cell) return;
-            let val = cell.toString().toLowerCase();
-            if (val.includes("10 year") || val.includes("10 yr")) col10yr = i;
-        });
-    });
-
-    // 2. Extract Data
-    rows.forEach(row => {
-        // Try to find the name of the investment option
-        let name = row.find(c => c && c.length > 3 && isNaN(parseFloat(c.toString().replace('%',''))) && !c.toLowerCase().includes("year"));
-        
-        if (name && col10yr !== -1 && row[col10yr]) {
-            let rateRaw = row[col10yr].toString().replace(/[^0-9.-]/g, '');
-            let n = parseFloat(rateRaw);
-            if (!isNaN(n) && n !== 0) {
-                // Fix percentage logic (8.5 vs 0.085)
-                let finalRate = (n > 0.5 || row[col10yr].includes('%')) ? n / 100 : n;
-                options.push({ name: name.trim(), rate: finalRate });
-            }
-        }
-    });
-    return options;
-}
 
 function updateOptions(pane) {
     const fund = document.getElementById('fund' + pane).value;
     const select = document.getElementById('opt' + pane);
-    select.innerHTML = "";
+    select.innerHTML = '';
     
-    if (remoteData[fund]) {
-        remoteData[fund].forEach(o => {
-            const opt = document.createElement('option');
-            opt.value = o.rate;
-            opt.textContent = `${o.name} (${(o.rate * 100).toFixed(2)}%)`;
-            select.appendChild(opt);
+    for (const [groupName, options] of Object.entries(groupedData[fund])) {
+        const group = document.createElement('optgroup');
+        group.label = groupName;
+        options.forEach(o => {
+            const el = document.createElement('option');
+            el.value = o.rate;
+            el.textContent = `${o.name} (${(o.rate * 100).toFixed(2)}% p.a.)`;
+            group.appendChild(el);
         });
+        select.appendChild(group);
     }
 }
 
 function calculate() {
     const age = parseInt(document.getElementById('age').value);
     const retAge = parseInt(document.getElementById('retAge').value);
-    const rA = parseFloat(document.getElementById('optA').value);
-    const rB = parseFloat(document.getElementById('optB').value);
+    const sg = parseFloat(document.getElementById('sgRate').value) / 100;
+    const sSac = parseFloat(document.getElementById('salSac').value);
+    const wInf = parseFloat(document.getElementById('wageInf').value) / 100;
+    const rateA = parseFloat(document.getElementById('optA').value);
+    const rateB = parseFloat(document.getElementById('optB').value);
     
-    let bA = parseFloat(document.getElementById('balance').value);
-    let bB = bA;
+    let balA = parseFloat(document.getElementById('balance').value);
+    let balB = balA;
     let sal = parseFloat(document.getElementById('salary').value);
-    let sg = parseFloat(document.getElementById('sgRate').value) / 100;
-    
-    let labels = [], dA = [], dB = [];
 
-    for (let y = age; y <= retAge; y++) {
-        labels.push(y); dA.push(bA); dB.push(bB);
-        let con = (sal * sg) * 0.85; 
-        bA = (bA + con/2) * (1 + rA) + con/2;
-        bB = (bB + con/2) * (1 + rB) + con/2;
-        sal *= 1.03;
+    let labels = [], pathA = [], pathB = [], rows = "";
+
+    for (let year = age; year <= retAge; year++) {
+        labels.push(year);
+        pathA.push(balA);
+        pathB.push(balB);
+
+        rows += `<tr>
+            <td>${year}</td>
+            <td>$${Math.round(sal).toLocaleString()}</td>
+            <td class="bal-a">$${Math.round(balA).toLocaleString()}</td>
+            <td class="bal-b">$${Math.round(balB).toLocaleString()}</td>
+            <td>$${Math.round(Math.abs(balA - balB)).toLocaleString()}</td>
+        </tr>`;
+
+        let annualContrib = ((sal * sg) + sSac) * 0.85; 
+        balA = (balA + (annualContrib / 2)) * (1 + rateA) + (annualContrib / 2);
+        balB = (balB + (annualContrib / 2)) * (1 + rateB) + (annualContrib / 2);
+        sal *= (1 + wInf);
     }
-    
-    document.getElementById('resultsArea').style.display = 'block';
-    renderChart(labels, dA, dB);
+
+    document.getElementById('tableBody').innerHTML = rows;
+    document.getElementById('chartArea').style.display = 'block';
+    document.getElementById('tableArea').style.display = 'block';
+    renderChart(labels, pathA, pathB);
 }
 
-function renderChart(labels, dA, dB) {
+function renderChart(labels, dataA, dataB) {
     const ctx = document.getElementById('compChart').getContext('2d');
     if (chart) chart.destroy();
     chart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels,
-            datasets: [
-                { label: 'Primary Fund', data: dA, borderColor: '#002e6d', fill: false },
-                { label: 'Comparison Fund', data: dB, borderColor: '#e53e3e', fill: false }
-            ]
+            labels: labels,
+            datasets: [{
+                label: 'Primary Choice',
+                data: dataA,
+                borderColor: '#002e6d',
+                backgroundColor: 'rgba(0, 46, 109, 0.1)',
+                fill: true,
+                borderWidth: 3,
+                tension: 0.1
+            }, {
+                label: 'Comparison Fund',
+                data: dataB,
+                borderColor: '#e53e3e',
+                backgroundColor: 'rgba(229, 62, 62, 0.1)',
+                fill: true,
+                borderWidth: 3,
+                tension: 0.1
+            }]
         },
         options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => `${ctx.dataset.label}: $${Math.round(ctx.parsed.y).toLocaleString()}`
+                    }
+                }
+            },
             scales: { y: { ticks: { callback: v => '$' + v.toLocaleString() } } }
         }
     });
 }
 
-init();
+// Initialize
+updateOptions('A');
+updateOptions('B');
 </script>
 </body>
 </html>
