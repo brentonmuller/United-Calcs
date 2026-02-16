@@ -7,122 +7,172 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        :root { --navy: #002e6d; --bg: #f4f8fb; --red: #e53e3e; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-top: 10px solid var(--navy); }
-        .setup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 30px; background: #f9f9f9; padding: 20px; border-radius: 8px; }
-        .input-box label { display: block; font-size: 11px; font-weight: bold; color: var(--navy); margin-bottom: 5px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
-        .pane { padding: 20px; border: 2px solid #eee; border-radius: 10px; }
-        button { width: 100%; padding: 15px; background: var(--navy); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        #status { font-weight: bold; text-align: center; padding: 10px; margin-bottom: 10px; border-radius: 4px; }
+        :root { --navy: #002e6d; --bg: #f4f8fb; --red: #e53e3e; --white: #ffffff; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: #2c3e50; padding: 20px; line-height: 1.5; }
+        .container { max-width: 1000px; margin: 0 auto; background: var(--white); padding: 35px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 10px solid var(--navy); }
+        .header { text-align: center; margin-bottom: 25px; }
+        .setup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 30px; background: #fdfdfd; padding: 20px; border: 1px solid #eee; border-radius: 10px; }
+        .input-box label { display: block; font-size: 11px; font-weight: bold; color: var(--navy); text-transform: uppercase; margin-bottom: 6px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .pane { padding: 20px; border: 2px solid #f0f0f0; border-radius: 12px; transition: 0.3s; }
+        .pane:hover { border-color: #ddd; }
+        .pane.a { border-left: 6px solid var(--navy); }
+        .pane.b { border-left: 6px solid var(--red); }
+        h3 { margin-top: 0; color: var(--navy); font-size: 18px; }
+        button { width: 100%; padding: 18px; background: var(--navy); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #001f4d; transform: translateY(-1px); }
+        #status-bar { text-align: center; padding: 10px; margin-bottom: 20px; border-radius: 6px; font-weight: bold; font-size: 13px; }
+        .loading { background: #e7f3ff; color: #31708f; }
+        .error { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="status" style="background:#d9edf7; color:#31708f;">Syncing with brentonmuller/United-Calcs...</div>
+    <div class="header">
+        <h1 style="color: var(--navy); margin:0;">STRATEGIC COMPARISON</h1>
+        <div id="status-bar" class="loading">Connecting to United-Calcs Repository...</div>
+    </div>
 
     <div class="setup-grid">
-        <div class="input-box"><label>Age</label><input type="number" id="age" value="35"></div>
-        <div class="input-box"><label>Retire Age</label><input type="number" id="retAge" value="67"></div>
-        <div class="input-box"><label>Balance ($)</label><input type="number" id="balance" value="100000"></div>
-        <div class="input-box"><label>Salary ($)</label><input type="number" id="salary" value="100000"></div>
-        <div class="input-box"><label>SG Rate (%)</label><input type="number" id="sgRate" value="12"></div>
+        <div class="input-box"><label>Current Age</label><input type="number" id="age" value="35"></div>
+        <div class="input-box"><label>Retirement Age</label><input type="number" id="retAge" value="67"></div>
+        <div class="input-box"><label>Current Balance ($)</label><input type="number" id="balance" value="100000"></div>
+        <div class="input-box"><label>Annual Salary ($)</label><input type="number" id="salary" value="100000"></div>
+        <div class="input-box"><label>SG Contribution (%)</label><input type="number" id="sgRate" value="12"></div>
     </div>
 
     <div class="comparison-grid">
-        <div class="pane">
+        <div class="pane a">
             <h3>Primary Fund</h3>
             <select id="fundA" onchange="updateOptions('A')">
-                <option value="cbus">Cbus</option>
-                <option value="ausSuper">AustralianSuper</option>
+                <option value="cbus_super">Cbus - Super</option>
+                <option value="cbus_ttr">Cbus - TTR</option>
+                <option value="cbus_retired">Cbus - Fully Retired</option>
+                <option value="aus_super">AustralianSuper</option>
+                <option value="aware">Aware Super</option>
+                <option value="art">ART</option>
+                <option value="hostplus">Hostplus</option>
+                <option value="brighter">Brighter Super</option>
                 <option value="bussq">BUSSQ</option>
+                <option value="plum">Plum (MLC)</option>
             </select>
-            <select id="optA" style="margin-top:15px;"><option>Loading...</option></select>
+            <label style="margin-top:15px; display:block; font-size:11px; font-weight:bold;">INVESTMENT OPTION</label>
+            <select id="optA"></select>
         </div>
-        <div class="pane">
+
+        <div class="pane b">
             <h3>Comparison Fund</h3>
             <select id="fundB" onchange="updateOptions('B')">
+                <option value="hostplus">Hostplus</option>
+                <option value="aus_super">AustralianSuper</option>
+                <option value="aware">Aware Super</option>
+                <option value="art">ART</option>
+                <option value="brighter">Brighter Super</option>
                 <option value="bussq">BUSSQ</option>
-                <option value="cbus">Cbus</option>
-                <option value="ausSuper">AustralianSuper</option>
+                <option value="plum">Plum (MLC)</option>
+                <option value="cbus_super">Cbus - Super</option>
             </select>
-            <select id="optB" style="margin-top:15px;"><option>Loading...</option></select>
+            <label style="margin-top:15px; display:block; font-size:11px; font-weight:bold;">INVESTMENT OPTION</label>
+            <select id="optB"></select>
         </div>
     </div>
 
-    <button onclick="calculate()">GENERATE COMPARISON</button>
-    <canvas id="compChart" style="margin-top:30px;"></canvas>
+    <button onclick="calculate()">GENERATE 2026 PROJECTION</button>
+    
+    <div id="resultsArea" style="display:none; margin-top:40px;">
+        <canvas id="compChart"></canvas>
+    </div>
 </div>
 
 <script>
-const USER = "brentonmuller";
-const REPO = "United-Calcs";
-const baseUrl = `https://raw.githubusercontent.com/${USER}/${REPO}/main/calculators/`;
+// CONFIGURATION
+const GITHUB_USER = "brentonmuller";
+const GITHUB_REPO = "United-Calcs";
+const DATA_PATH = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/calculators/`;
 
 const FILE_MAP = {
-    cbus: "CBUS Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
+    cbus_super: "CBUS Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
+    cbus_ttr: "CBUS TTR Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
+    cbus_retired: "CBUS Fully Retired Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
+    hostplus: "Hostplus 31 Jan 26.xlsx - Sheet1.csv",
+    aware: "Aware 31 Jan 26.xlsx - Sheet1.csv",
+    art: "ART 31 Jan 26.xlsx - Sheet1.csv",
+    plum: "Plum Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
     bussq: "BUSSQ Investment Returns 31 Dec 25.xlsx - Sheet1.csv",
-    ausSuper: "Aus Super Returns 30 June 25.xlsx - Sheet1.csv"
+    aus_super: "Aus Super Returns 30 June 25.xlsx - Sheet1.csv",
+    brighter: "Brighter Investment returns 31 Jan 26.xlsx - Sheet1.csv"
 };
 
 let remoteData = {};
 let chart = null;
 
 async function init() {
-    let loaded = 0;
+    const status = document.getElementById('status-bar');
+    let loadedCount = 0;
+
     for (let key in FILE_MAP) {
         try {
-            const res = await fetch(baseUrl + encodeURIComponent(FILE_MAP[key]));
-            if (res.ok) {
-                const csv = await res.text();
-                remoteData[key] = parseData(csv);
-                loaded++;
+            const response = await fetch(DATA_PATH + encodeURIComponent(FILE_MAP[key]));
+            if (response.ok) {
+                const csvText = await response.text();
+                const parsed = parseFuzzyCSV(csvText);
+                if (Object.values(parsed).some(group => group.length > 0)) {
+                    remoteData[key] = parsed;
+                    loadedCount++;
+                }
             }
-        } catch (e) { console.error("Error loading " + key, e); }
+        } catch (e) { console.warn("Failed to load " + key); }
     }
 
-    if (loaded === 0) {
-        document.getElementById('status').innerHTML = "❌ DATA NOT FOUND: Check if Repo is PUBLIC.";
-        document.getElementById('status').style.background = "#f2dede";
+    if (loadedCount === 0) {
+        status.className = "error";
+        status.innerHTML = "❌ DATA ERROR: Files not found. Ensure repository is set to PUBLIC.";
     } else {
-        document.getElementById('status').style.display = 'none';
+        status.style.display = 'none';
         updateOptions('A'); updateOptions('B');
     }
 }
 
-function parseData(csv) {
-    const rows = Papa.parse(csv, { header: false, skipEmptyLines: true }).data;
+function parseFuzzyCSV(csv) {
+    const rows = Papa.parse(csv, { header: false, skipEmptyLines: true, relaxQuotes: true }).data;
     const groups = { "10yr": [], "5yr": [], "3yr": [], "1yr": [] };
-    let cols = { "10yr": -1, "5yr": -1, "3yr": -1, "1yr": -1 };
+    let colIdx = { "10yr": -1, "5yr": -1, "3yr": -1, "1yr": -1 };
 
-    // Find columns by header name
+    // 1. Map Columns by searching for keywords
     rows.forEach(row => {
         row.forEach((cell, i) => {
             if (!cell) return;
-            let c = cell.toString().toLowerCase();
-            if (c.includes("10 year") || c.includes("10 yr")) cols["10yr"] = i;
-            if (c.includes("5 year") || c.includes("5 yr")) cols["5yr"] = i;
-            if (c.includes("3 year") || c.includes("3 yr")) cols["3yr"] = i;
-            if (c.includes("1 year") || (c.includes("1 yr") && !c.includes("3 yr"))) cols["1yr"] = i;
+            let c = cell.toString().toLowerCase().replace(/\s/g, '');
+            if (c.includes("10year") || c.includes("10yr")) colIdx["10yr"] = i;
+            if (c.includes("5year") || c.includes("5yr")) colIdx["5yr"] = i;
+            if (c.includes("3year") || c.includes("3yr")) colIdx["3yr"] = i;
+            if (c.includes("1year") || (c.includes("1yr") && !c.includes("3yr"))) colIdx["1yr"] = i;
         });
     });
 
+    // 2. Extract Data Rows
     rows.forEach(row => {
-        // Find the name (skips empty leading columns like in BUSSQ)
-        let name = row.find(c => c && c.trim().length > 3 && isNaN(parseFloat(c.toString().replace('%',''))) && !c.toLowerCase().includes("year") && !c.toLowerCase().includes("%"));
+        // Name Search: First cell > 3 chars that isn't a date or header
+        let name = row.find(c => {
+            if (!c || c.toString().trim().length < 3) return false;
+            let val = c.toString().toLowerCase();
+            return !val.includes("year") && !val.includes("yr") && isNaN(parseFloat(val.replace('%','')));
+        });
+
         if (!name) return;
 
         ["10yr", "5yr", "3yr", "1yr"].forEach(tf => {
-            if (cols[tf] !== -1 && row[cols[tf]]) {
-                let val = row[cols[tf]].toString().replace(/[^0-9.-]/g, '');
-                let n = parseFloat(val);
+            let idx = colIdx[tf];
+            if (idx !== -1 && row[idx]) {
+                let raw = row[idx].toString();
+                let clean = raw.replace(/[^0-9.-]/g, '');
+                let n = parseFloat(clean);
                 if (!isNaN(n) && n !== 0) {
-                    // Normalize: handle 8.5% (AusSuper) and 0.085 (Cbus/BUSSQ)
-                    let rate = (n > 0.5 || row[cols[tf]].toString().includes('%')) ? n / 100 : n;
-                    groups[tf].push({ name: name.trim(), rate });
+                    // Normalize (0.08 vs 8.0%)
+                    let rate = (n > 0.5 || raw.includes('%')) ? n / 100 : n;
+                    groups[tf].push({ name: name.trim(), rate: rate });
                 }
             }
         });
@@ -131,17 +181,18 @@ function parseData(csv) {
 }
 
 function updateOptions(pane) {
-    const fund = document.getElementById('fund' + pane).value;
+    const fundKey = document.getElementById('fund' + pane).value;
     const select = document.getElementById('opt' + pane);
     select.innerHTML = "";
-    if (!remoteData[fund]) return;
-    
+    const data = remoteData[fundKey];
+    if (!data) return;
+
     const seen = new Set();
     ["10yr", "5yr", "3yr", "1yr"].forEach(tf => {
-        if (remoteData[fund][tf].length > 0) {
+        if (data[tf].length > 0) {
             const grp = document.createElement('optgroup');
-            grp.label = tf.replace('yr', ' Year History');
-            remoteData[fund][tf].forEach(o => {
+            grp.label = tf.replace('yr', ' Year Return History');
+            data[tf].forEach(o => {
                 if (!seen.has(o.name)) {
                     const opt = document.createElement('option');
                     opt.value = o.rate;
@@ -158,39 +209,60 @@ function updateOptions(pane) {
 function calculate() {
     const age = parseInt(document.getElementById('age').value);
     const retAge = parseInt(document.getElementById('retAge').value);
-    const rA = parseFloat(document.getElementById('optA').value);
-    const rB = parseFloat(document.getElementById('optB').value);
-    let bA = parseFloat(document.getElementById('balance').value);
-    let bB = bA;
+    const rateA = parseFloat(document.getElementById('optA').value);
+    const rateB = parseFloat(document.getElementById('optB').value);
+    
+    if (isNaN(rateA) || isNaN(rateB)) { 
+        alert("Please select an investment option for both funds."); 
+        return; 
+    }
+
+    let balA = parseFloat(document.getElementById('balance').value);
+    let balB = balA;
     let sal = parseFloat(document.getElementById('salary').value);
     let sg = parseFloat(document.getElementById('sgRate').value) / 100;
     
     let labels = [], pathA = [], pathB = [];
+
     for (let y = age; y <= retAge; y++) {
-        labels.push(y); pathA.push(bA); pathB.push(bB);
-        let con = (sal * sg) * 0.85; 
-        bA = (bA + con/2) * (1 + rA) + con/2;
-        bB = (bB + con/2) * (1 + rB) + con/2;
-        sal *= 1.03;
+        labels.push(y);
+        pathA.push(Math.round(balA));
+        pathB.push(Math.round(balB));
+        
+        let contrib = (sal * sg) * 0.85; // Less 15% tax
+        balA = (balA + contrib/2) * (1 + rateA) + contrib/2;
+        balB = (balB + contrib/2) * (1 + rateB) + contrib/2;
+        sal *= 1.03; // 3% Wage growth
     }
+
+    document.getElementById('resultsArea').style.display = 'block';
     renderChart(labels, pathA, pathB);
 }
 
-function renderChart(labels, dA, dB) {
+function renderChart(labels, dataA, dataB) {
     const ctx = document.getElementById('compChart').getContext('2d');
     if (chart) chart.destroy();
     chart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels,
+            labels: labels,
             datasets: [
-                { label: 'Primary', data: dA, borderColor: '#002e6d', fill: false },
-                { label: 'Comparison', data: dB, borderColor: '#e53e3e', fill: false }
+                { label: 'Primary Fund', data: dataA, borderColor: '#002e6d', backgroundColor: 'rgba(0, 46, 109, 0.1)', fill: true, tension: 0.1 },
+                { label: 'Comparison Fund', data: dataB, borderColor: '#e53e3e', backgroundColor: 'rgba(229, 62, 62, 0.1)', fill: true, tension: 0.1 }
             ]
         },
-        options: { scales: { y: { ticks: { callback: v => '$' + v.toLocaleString() } } } }
+        options: {
+            responsive: true,
+            scales: {
+                y: { ticks: { callback: (v) => '$' + v.toLocaleString() } }
+            },
+            plugins: {
+                tooltip: { callbacks: { label: (c) => c.dataset.label + ": $" + c.parsed.y.toLocaleString() } }
+            }
+        }
     });
 }
+
 init();
 </script>
 </body>
