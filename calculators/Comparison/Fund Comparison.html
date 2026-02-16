@@ -81,10 +81,9 @@
 </div>
 
 <script>
-// --- CONFIGURATION ---
 const GITHUB_CONFIG = {
-    user: "brentonmuller", 
-    repo: "United-Calcs",
+    user: "YOUR_USERNAME", 
+    repo: "YOUR_REPO_NAME",
     branch: "main",
     folder: "calculators"
 };
@@ -113,45 +112,51 @@ async function init() {
             const response = await fetch(baseUrl + encodeURIComponent(FILE_MAP[key]));
             if (response.ok) {
                 const csvText = await response.text();
-                remoteData[key] = parseRobustCSV(csvText);
+                remoteData[key] = parseCustomCSV(csvText);
             }
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("Error loading " + key, e); }
     }
     document.getElementById('loader').style.display = 'none';
     updateOptions('A'); updateOptions('B');
 }
 
-function parseRobustCSV(csv) {
+function parseCustomCSV(csv) {
     const results = Papa.parse(csv, { header: false, skipEmptyLines: true });
     const rows = results.data;
     const groups = { "10yr": [], "5yr": [], "3yr": [], "1yr": [] };
 
-    // 1. Identify where the year columns are in the first few rows
+    // Find the header row to get column indexes
     let colIdx = { "10yr": -1, "5yr": -1, "3yr": -1, "1yr": -1 };
-    rows.slice(0, 5).forEach(row => {
-        row.forEach((cell, i) => {
+    rows.forEach((row, rIdx) => {
+        row.forEach((cell, cIdx) => {
             if (!cell) return;
             const c = cell.toString().toLowerCase();
-            if (c.includes("10 year") || c.includes("10 yr")) colIdx["10yr"] = i;
-            else if (c.includes("5 year") || c.includes("5 yr")) colIdx["5yr"] = i;
-            else if (c.includes("3 year") || c.includes("3 yr")) colIdx["3yr"] = i;
-            else if (c.includes("1 year") || (c.includes("1 yr") && !c.includes("3 yr"))) colIdx["1yr"] = i;
+            if (c.includes("10 year") || c.includes("10 yr")) colIdx["10yr"] = cIdx;
+            if (c.includes("5 year") || c.includes("5 yr")) colIdx["5yr"] = cIdx;
+            if (c.includes("3 year") || c.includes("3 yr")) colIdx["3yr"] = cIdx;
+            if (c.includes("1 year") || (c.includes("1 yr") && !c.includes("3 yr"))) colIdx["1yr"] = cIdx;
         });
     });
 
-    // 2. Extract Data
     rows.forEach(row => {
-        // Find Name: First cell that is text and not a header
-        let name = row.find(cell => cell && cell.length > 3 && isNaN(parseFloat(cell.toString().replace('%',''))));
-        if (!name || name.toLowerCase().includes("option") || name.toLowerCase().includes("return")) return;
+        // CLEAN NAME: Look for the first non-numeric cell that isn't a header
+        let name = row.find(cell => {
+            if (!cell) return false;
+            let cleanVal = cell.toString().trim();
+            return cleanVal.length > 3 && 
+                   isNaN(parseFloat(cleanVal.replace('%',''))) &&
+                   !cleanVal.toLowerCase().includes("year") &&
+                   !cleanVal.toLowerCase().includes("month");
+        });
 
-        // Find Rates based on column indices discovered
+        if (!name) return;
+
+        // EXTRACT RATES
         ["10yr", "5yr", "3yr", "1yr"].forEach(tf => {
-            if (colIdx[tf] !== -1) {
-                let val = row[colIdx[tf]];
-                let rate = cleanRate(val);
+            if (colIdx[tf] !== -1 && row[colIdx[tf]]) {
+                let rate = cleanRate(row[colIdx[tf]]);
                 if (!isNaN(rate) && rate !== 0) {
-                    groups[tf].push({ name, rate });
+                    groups[tf].push({ name: name.trim(), rate: rate });
                 }
             }
         });
@@ -164,7 +169,7 @@ function cleanRate(val) {
     let s = val.toString().replace(/[^0-9.-]/g, '');
     let n = parseFloat(s);
     if (isNaN(n)) return NaN;
-    // Normalize: Cbus uses 0.08, AusSuper uses 8.5. 
+    // Cbus/Hostplus decimals (0.08) vs Percentages (8.0%)
     return (n > 0.5 || val.toString().includes('%')) ? n / 100 : n;
 }
 
@@ -175,12 +180,11 @@ function updateOptions(pane) {
     const data = remoteData[fundKey];
     if (!data) return;
 
+    const seen = new Set();
     ["10yr", "5yr", "3yr", "1yr"].forEach(tf => {
         if (data[tf].length > 0) {
             const grp = document.createElement('optgroup');
-            grp.label = tf.replace('yr', ' Year History');
-            // Filter duplicates (some funds repeat options across years)
-            const seen = new Set();
+            grp.label = tf.replace('yr', ' Year Performance');
             data[tf].forEach(o => {
                 if (!seen.has(o.name)) {
                     const opt = document.createElement('option');
@@ -225,8 +229,8 @@ function renderChart(labels, dataA, dataB) {
         data: {
             labels,
             datasets: [
-                { label: 'Primary', data: dataA, borderColor: '#002e6d', fill: false },
-                { label: 'Comparison', data: dataB, borderColor: '#e53e3e', fill: false }
+                { label: 'Primary', data: dataA, borderColor: '#002e6d', fill: false, tension: 0.1 },
+                { label: 'Comparison', data: dataB, borderColor: '#e53e3e', fill: false, tension: 0.1 }
             ]
         }
     });
