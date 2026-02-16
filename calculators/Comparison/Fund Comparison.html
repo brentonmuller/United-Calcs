@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Strategic Wealth Projection 2026</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo="> <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         :root { --cbus-navy: #002e6d; --cbus-green: #71B44D; --cbus-light: #f4f8fb; --comp-red: #e53e3e; }
@@ -18,7 +18,7 @@
         .pane.a { border-color: var(--cbus-navy); }
         .pane.b { border-color: var(--comp-red); }
         button { width: 100%; padding: 15px; background: var(--cbus-navy); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        #loader { font-weight: bold; color: var(--cbus-navy); text-align: center; padding: 10px; }
+        #loader { font-weight: bold; color: #d9534f; text-align: center; padding: 10px; background: #f2dede; border-radius: 5px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -28,7 +28,7 @@
         <h1 style="color: var(--cbus-navy); margin:0;">STRATEGIC <span>COMPARISON</span></h1>
     </div>
 
-    <div id="loader">Syncing data from GitHub...</div>
+    <div id="loader">Checking Connection to GitHub...</div>
 
     <div class="setup-grid">
         <div class="input-box"><label>Current Age</label><input type="number" id="age" value="35"></div>
@@ -81,12 +81,9 @@
 </div>
 
 <script>
-const GITHUB_CONFIG = {
-    user: "brentonmuller", 
-    repo: "United-Calcs",
-    branch: "main",
-    folder: "calculators"
-};
+// IMPORTANT: Change these two lines
+const GITHUB_USER = "YOUR_USERNAME"; 
+const GITHUB_REPO = "YOUR_REPO_NAME";
 
 const FILE_MAP = {
     cbus_super: "CBUS Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
@@ -105,59 +102,67 @@ let remoteData = {};
 let chart = null;
 
 async function init() {
-    const baseUrl = `https://raw.githubusercontent.com/${GITHUB_CONFIG.user}/${GITHUB_CONFIG.repo}/${GITHUB_CONFIG.branch}/${GITHUB_CONFIG.folder}/`;
+    const loader = document.getElementById('loader');
+    const baseUrl = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/calculators/`;
     
+    let loadedCount = 0;
     for (let key in FILE_MAP) {
         try {
-            const response = await fetch(baseUrl + encodeURIComponent(FILE_MAP[key]));
-            if (response.ok) {
-                const csvText = await response.text();
-                remoteData[key] = parseCustomCSV(csvText);
+            const url = baseUrl + encodeURIComponent(FILE_MAP[key]);
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                console.error(`Failed: ${FILE_MAP[key]} at ${url}`);
+                continue;
             }
-        } catch (e) { console.error("Error loading " + key, e); }
+
+            const csvText = await response.text();
+            const data = parseData(csvText);
+            
+            // Check if we actually found data inside the file
+            if (Object.values(data).some(arr => arr.length > 0)) {
+                remoteData[key] = data;
+                loadedCount++;
+            }
+        } catch (e) { console.error(e); }
     }
-    document.getElementById('loader').style.display = 'none';
-    updateOptions('A'); updateOptions('B');
+
+    if (loadedCount === 0) {
+        loader.innerHTML = "❌ ERROR: No data files found. Check your GitHub Username and Repo Name in the code.";
+    } else {
+        loader.style.display = 'none';
+        updateOptions('A'); 
+        updateOptions('B');
+    }
 }
 
-function parseCustomCSV(csv) {
-    const results = Papa.parse(csv, { header: false, skipEmptyLines: true });
-    const rows = results.data;
+function parseData(csv) {
+    const rows = Papa.parse(csv, { header: false, skipEmptyLines: true }).data;
     const groups = { "10yr": [], "5yr": [], "3yr": [], "1yr": [] };
-
-    // Find the header row to get column indexes
     let colIdx = { "10yr": -1, "5yr": -1, "3yr": -1, "1yr": -1 };
-    rows.forEach((row, rIdx) => {
-        row.forEach((cell, cIdx) => {
+
+    // 1. Map columns
+    rows.forEach(row => {
+        row.forEach((cell, i) => {
             if (!cell) return;
-            const c = cell.toString().toLowerCase();
-            if (c.includes("10 year") || c.includes("10 yr")) colIdx["10yr"] = cIdx;
-            if (c.includes("5 year") || c.includes("5 yr")) colIdx["5yr"] = cIdx;
-            if (c.includes("3 year") || c.includes("3 yr")) colIdx["3yr"] = cIdx;
-            if (c.includes("1 year") || (c.includes("1 yr") && !c.includes("3 yr"))) colIdx["1yr"] = cIdx;
+            let c = cell.toString().toLowerCase();
+            if (c.includes("10 year") || c.includes("10 yr")) colIdx["10yr"] = i;
+            if (c.includes("5 year") || c.includes("5 yr")) colIdx["5yr"] = i;
+            if (c.includes("3 year") || c.includes("3 yr")) colIdx["3yr"] = i;
+            if (c.includes("1 year") || (c.includes("1 yr") && !c.includes("3 yr"))) colIdx["1yr"] = i;
         });
     });
 
+    // 2. Extract rows
     rows.forEach(row => {
-        // CLEAN NAME: Look for the first non-numeric cell that isn't a header
-        let name = row.find(cell => {
-            if (!cell) return false;
-            let cleanVal = cell.toString().trim();
-            return cleanVal.length > 3 && 
-                   isNaN(parseFloat(cleanVal.replace('%',''))) &&
-                   !cleanVal.toLowerCase().includes("year") &&
-                   !cleanVal.toLowerCase().includes("month");
-        });
-
+        // Name is the first cell that looks like an investment option
+        let name = row.find(c => c && c.length > 3 && isNaN(parseFloat(c.toString().replace('%',''))) && !c.toLowerCase().includes("year"));
         if (!name) return;
 
-        // EXTRACT RATES
         ["10yr", "5yr", "3yr", "1yr"].forEach(tf => {
             if (colIdx[tf] !== -1 && row[colIdx[tf]]) {
                 let rate = cleanRate(row[colIdx[tf]]);
-                if (!isNaN(rate) && rate !== 0) {
-                    groups[tf].push({ name: name.trim(), rate: rate });
-                }
+                if (!isNaN(rate) && rate !== 0) groups[tf].push({ name: name.trim(), rate });
             }
         });
     });
@@ -165,11 +170,9 @@ function parseCustomCSV(csv) {
 }
 
 function cleanRate(val) {
-    if (!val || val === "-" || val.toString().toLowerCase().includes("n/a")) return NaN;
     let s = val.toString().replace(/[^0-9.-]/g, '');
     let n = parseFloat(s);
     if (isNaN(n)) return NaN;
-    // Cbus/Hostplus decimals (0.08) vs Percentages (8.0%)
     return (n > 0.5 || val.toString().includes('%')) ? n / 100 : n;
 }
 
@@ -178,13 +181,19 @@ function updateOptions(pane) {
     const select = document.getElementById('opt' + pane);
     select.innerHTML = "";
     const data = remoteData[fundKey];
-    if (!data) return;
+    
+    if (!data) {
+        const opt = document.createElement('option');
+        opt.textContent = "Data not loaded";
+        select.appendChild(opt);
+        return;
+    }
 
     const seen = new Set();
     ["10yr", "5yr", "3yr", "1yr"].forEach(tf => {
         if (data[tf].length > 0) {
             const grp = document.createElement('optgroup');
-            grp.label = tf.replace('yr', ' Year Performance');
+            grp.label = tf.replace('yr', ' Year History');
             data[tf].forEach(o => {
                 if (!seen.has(o.name)) {
                     const opt = document.createElement('option');
@@ -204,12 +213,14 @@ function calculate() {
     const retAge = parseInt(document.getElementById('retAge').value);
     const rateA = parseFloat(document.getElementById('optA').value);
     const rateB = parseFloat(document.getElementById('optB').value);
+    if (isNaN(rateA) || isNaN(rateB)) { alert("Please select an investment option for both funds."); return; }
+
     let balA = parseFloat(document.getElementById('balance').value);
     let balB = balA;
     let sal = parseFloat(document.getElementById('salary').value);
     let sg = parseFloat(document.getElementById('sgRate').value) / 100;
-
     let labels = [], pathA = [], pathB = [];
+
     for (let y = age; y <= retAge; y++) {
         labels.push(y); pathA.push(balA); pathB.push(balB);
         let contrib = (sal * sg) * 0.85; 
@@ -229,8 +240,8 @@ function renderChart(labels, dataA, dataB) {
         data: {
             labels,
             datasets: [
-                { label: 'Primary', data: dataA, borderColor: '#002e6d', fill: false, tension: 0.1 },
-                { label: 'Comparison', data: dataB, borderColor: '#e53e3e', fill: false, tension: 0.1 }
+                { label: 'Primary Choice', data: dataA, borderColor: '#002e6d', fill: false },
+                { label: 'Comparison Fund', data: dataB, borderColor: '#e53e3e', fill: false }
             ]
         }
     });
@@ -238,5 +249,4 @@ function renderChart(labels, dataA, dataB) {
 init();
 </script>
 </body>
-
 </html>
