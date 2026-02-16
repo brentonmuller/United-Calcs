@@ -16,12 +16,10 @@
         input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
         .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
         .pane { padding: 20px; border: 2px solid #f0f0f0; border-radius: 12px; transition: 0.3s; }
-        .pane:hover { border-color: #ddd; }
         .pane.a { border-left: 6px solid var(--navy); }
         .pane.b { border-left: 6px solid var(--red); }
         h3 { margin-top: 0; color: var(--navy); font-size: 18px; }
         button { width: 100%; padding: 18px; background: var(--navy); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
-        button:hover { background: #001f4d; transform: translateY(-1px); }
         #status-bar { text-align: center; padding: 10px; margin-bottom: 20px; border-radius: 6px; font-weight: bold; font-size: 13px; }
         .loading { background: #e7f3ff; color: #31708f; }
         .error { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
@@ -32,7 +30,7 @@
 <div class="container">
     <div class="header">
         <h1 style="color: var(--navy); margin:0;">STRATEGIC COMPARISON</h1>
-        <div id="status-bar" class="loading">Connecting to United-Calcs Repository...</div>
+        <div id="status-bar" class="loading">Connecting to brentonmuller/United-Calcs...</div>
     </div>
 
     <div class="setup-grid">
@@ -40,12 +38,12 @@
         <div class="input-box"><label>Retirement Age</label><input type="number" id="retAge" value="67"></div>
         <div class="input-box"><label>Current Balance ($)</label><input type="number" id="balance" value="100000"></div>
         <div class="input-box"><label>Annual Salary ($)</label><input type="number" id="salary" value="100000"></div>
-        <div class="input-box"><label>SG Contribution (%)</label><input type="number" id="sgRate" value="12"></div>
+        <div class="input-box"><label>SG Rate (%)</label><input type="number" id="sgRate" value="12"></div>
     </div>
 
     <div class="comparison-grid">
         <div class="pane a">
-            <h3>Primary Fund</h3>
+            <h3>Primary Choice</h3>
             <select id="fundA" onchange="updateOptions('A')">
                 <option value="cbus_super">Cbus - Super</option>
                 <option value="cbus_ttr">Cbus - TTR</option>
@@ -69,9 +67,7 @@
                 <option value="aus_super">AustralianSuper</option>
                 <option value="aware">Aware Super</option>
                 <option value="art">ART</option>
-                <option value="brighter">Brighter Super</option>
                 <option value="bussq">BUSSQ</option>
-                <option value="plum">Plum (MLC)</option>
                 <option value="cbus_super">Cbus - Super</option>
             </select>
             <label style="margin-top:15px; display:block; font-size:11px; font-weight:bold;">INVESTMENT OPTION</label>
@@ -80,16 +76,15 @@
     </div>
 
     <button onclick="calculate()">GENERATE 2026 PROJECTION</button>
-    
     <div id="resultsArea" style="display:none; margin-top:40px;">
         <canvas id="compChart"></canvas>
     </div>
 </div>
 
 <script>
-// CONFIGURATION
 const GITHUB_USER = "brentonmuller";
 const GITHUB_REPO = "United-Calcs";
+// Corrected Base URL to look into your 'calculators' folder
 const DATA_PATH = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/calculators/`;
 
 const FILE_MAP = {
@@ -114,21 +109,23 @@ async function init() {
 
     for (let key in FILE_MAP) {
         try {
-            const response = await fetch(DATA_PATH + encodeURIComponent(FILE_MAP[key]));
+            // Encode the URL to handle spaces in file names correctly
+            const url = DATA_PATH + encodeURIComponent(FILE_MAP[key]);
+            const response = await fetch(url);
             if (response.ok) {
                 const csvText = await response.text();
                 const parsed = parseFuzzyCSV(csvText);
-                if (Object.values(parsed).some(group => group.length > 0)) {
+                if (Object.values(parsed).some(g => g.length > 0)) {
                     remoteData[key] = parsed;
                     loadedCount++;
                 }
             }
-        } catch (e) { console.warn("Failed to load " + key); }
+        } catch (e) { console.warn("Failed: " + key); }
     }
 
     if (loadedCount === 0) {
         status.className = "error";
-        status.innerHTML = "❌ DATA ERROR: Files not found. Ensure repository is set to PUBLIC.";
+        status.innerHTML = "❌ DATA ERROR: No files found. Check your GitHub folder name matches 'calculators' exactly.";
     } else {
         status.style.display = 'none';
         updateOptions('A'); updateOptions('B');
@@ -140,7 +137,7 @@ function parseFuzzyCSV(csv) {
     const groups = { "10yr": [], "5yr": [], "3yr": [], "1yr": [] };
     let colIdx = { "10yr": -1, "5yr": -1, "3yr": -1, "1yr": -1 };
 
-    // 1. Map Columns by searching for keywords
+    // 1. Search for headers
     rows.forEach(row => {
         row.forEach((cell, i) => {
             if (!cell) return;
@@ -152,13 +149,13 @@ function parseFuzzyCSV(csv) {
         });
     });
 
-    // 2. Extract Data Rows
+    // 2. Extract Data
     rows.forEach(row => {
-        // Name Search: First cell > 3 chars that isn't a date or header
+        // Skips empty cells at start (e.g. BUSSQ) and finds the option name
         let name = row.find(c => {
             if (!c || c.toString().trim().length < 3) return false;
-            let val = c.toString().toLowerCase();
-            return !val.includes("year") && !val.includes("yr") && isNaN(parseFloat(val.replace('%','')));
+            let v = c.toString().toLowerCase();
+            return !v.includes("year") && isNaN(parseFloat(v.replace('%','')));
         });
 
         if (!name) return;
@@ -170,7 +167,6 @@ function parseFuzzyCSV(csv) {
                 let clean = raw.replace(/[^0-9.-]/g, '');
                 let n = parseFloat(clean);
                 if (!isNaN(n) && n !== 0) {
-                    // Normalize (0.08 vs 8.0%)
                     let rate = (n > 0.5 || raw.includes('%')) ? n / 100 : n;
                     groups[tf].push({ name: name.trim(), rate: rate });
                 }
@@ -184,22 +180,17 @@ function updateOptions(pane) {
     const fundKey = document.getElementById('fund' + pane).value;
     const select = document.getElementById('opt' + pane);
     select.innerHTML = "";
-    const data = remoteData[fundKey];
-    if (!data) return;
+    if (!remoteData[fundKey]) return;
 
-    const seen = new Set();
     ["10yr", "5yr", "3yr", "1yr"].forEach(tf => {
-        if (data[tf].length > 0) {
+        if (remoteData[fundKey][tf].length > 0) {
             const grp = document.createElement('optgroup');
-            grp.label = tf.replace('yr', ' Year Return History');
-            data[tf].forEach(o => {
-                if (!seen.has(o.name)) {
-                    const opt = document.createElement('option');
-                    opt.value = o.rate;
-                    opt.textContent = `${o.name} (${(o.rate * 100).toFixed(2)}%)`;
-                    grp.appendChild(opt);
-                    seen.add(o.name);
-                }
+            grp.label = tf.replace('yr', ' Year Return');
+            remoteData[fundKey][tf].forEach(o => {
+                const opt = document.createElement('option');
+                opt.value = o.rate;
+                opt.textContent = `${o.name} (${(o.rate * 100).toFixed(2)}%)`;
+                grp.appendChild(opt);
             });
             select.appendChild(grp);
         }
@@ -209,60 +200,45 @@ function updateOptions(pane) {
 function calculate() {
     const age = parseInt(document.getElementById('age').value);
     const retAge = parseInt(document.getElementById('retAge').value);
-    const rateA = parseFloat(document.getElementById('optA').value);
-    const rateB = parseFloat(document.getElementById('optB').value);
+    const rA = parseFloat(document.getElementById('optA').value);
+    const rB = parseFloat(document.getElementById('optB').value);
     
-    if (isNaN(rateA) || isNaN(rateB)) { 
-        alert("Please select an investment option for both funds."); 
-        return; 
-    }
+    if (isNaN(rA) || isNaN(rB)) { alert("Select investment options first."); return; }
 
-    let balA = parseFloat(document.getElementById('balance').value);
-    let balB = balA;
+    let bA = parseFloat(document.getElementById('balance').value);
+    let bB = bA;
     let sal = parseFloat(document.getElementById('salary').value);
     let sg = parseFloat(document.getElementById('sgRate').value) / 100;
     
-    let labels = [], pathA = [], pathB = [];
-
+    let labels = [], dA = [], dB = [];
     for (let y = age; y <= retAge; y++) {
-        labels.push(y);
-        pathA.push(Math.round(balA));
-        pathB.push(Math.round(balB));
-        
-        let contrib = (sal * sg) * 0.85; // Less 15% tax
-        balA = (balA + contrib/2) * (1 + rateA) + contrib/2;
-        balB = (balB + contrib/2) * (1 + rateB) + contrib/2;
-        sal *= 1.03; // 3% Wage growth
+        labels.push(y); dA.push(Math.round(bA)); dB.push(Math.round(bB));
+        let con = (sal * sg) * 0.85; 
+        bA = (bA + con/2) * (1 + rA) + con/2;
+        bB = (bB + con/2) * (1 + rB) + con/2;
+        sal *= 1.03;
     }
-
     document.getElementById('resultsArea').style.display = 'block';
-    renderChart(labels, pathA, pathB);
+    renderChart(labels, dA, dB);
 }
 
-function renderChart(labels, dataA, dataB) {
+function renderChart(labels, dA, dB) {
     const ctx = document.getElementById('compChart').getContext('2d');
     if (chart) chart.destroy();
     chart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: labels,
+            labels,
             datasets: [
-                { label: 'Primary Fund', data: dataA, borderColor: '#002e6d', backgroundColor: 'rgba(0, 46, 109, 0.1)', fill: true, tension: 0.1 },
-                { label: 'Comparison Fund', data: dataB, borderColor: '#e53e3e', backgroundColor: 'rgba(229, 62, 62, 0.1)', fill: true, tension: 0.1 }
+                { label: 'Primary Fund', data: dA, borderColor: '#002e6d', fill: false },
+                { label: 'Comparison Fund', data: dB, borderColor: '#e53e3e', fill: false }
             ]
         },
         options: {
-            responsive: true,
-            scales: {
-                y: { ticks: { callback: (v) => '$' + v.toLocaleString() } }
-            },
-            plugins: {
-                tooltip: { callbacks: { label: (c) => c.dataset.label + ": $" + c.parsed.y.toLocaleString() } }
-            }
+            scales: { y: { ticks: { callback: v => '$' + v.toLocaleString() } } }
         }
     });
 }
-
 init();
 </script>
 </body>
