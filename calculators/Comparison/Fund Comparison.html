@@ -3,172 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <title>Strategic Wealth Projection 2026</title>
-    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        :root { --navy: #002e6d; --bg: #f4f8fb; --red: #e53e3e; --white: #ffffff; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: #2c3e50; padding: 20px; line-height: 1.5; }
-        .container { max-width: 1000px; margin: 0 auto; background: var(--white); padding: 35px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 10px solid var(--navy); }
-        .header { text-align: center; margin-bottom: 25px; }
-        .setup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 30px; background: #fdfdfd; padding: 20px; border: 1px solid #eee; border-radius: 10px; }
-        .input-box label { display: block; font-size: 11px; font-weight: bold; color: var(--navy); text-transform: uppercase; margin-bottom: 6px; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
-        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-        .pane { padding: 20px; border: 2px solid #f0f0f0; border-radius: 12px; transition: 0.3s; }
-        .pane.a { border-left: 6px solid var(--navy); }
-        .pane.b { border-left: 6px solid var(--red); }
-        h3 { margin-top: 0; color: var(--navy); font-size: 18px; }
-        button { width: 100%; padding: 18px; background: var(--navy); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
-        #status-bar { text-align: center; padding: 10px; margin-bottom: 20px; border-radius: 6px; font-weight: bold; font-size: 13px; }
-        .loading { background: #e7f3ff; color: #31708f; }
-        .error { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+        :root { --navy: #002e6d; --bg: #f4f8fb; --red: #e53e3e; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-top: 10px solid var(--navy); }
+        .setup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 30px; background: #f9f9f9; padding: 20px; border-radius: 8px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
+        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
+        .pane { padding: 20px; border: 2px solid #eee; border-radius: 10px; }
+        button { width: 100%; padding: 15px; background: var(--navy); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        #status { font-weight: bold; text-align: center; padding: 10px; margin-bottom: 10px; border-radius: 4px; }
+        .error-box { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header">
-        <h1 style="color: var(--navy); margin:0;">STRATEGIC COMPARISON</h1>
-        <div id="status-bar" class="loading">Connecting to brentonmuller/United-Calcs...</div>
+    <div id="status" style="background:#e6f7ff; color:#1890ff; padding:10px; text-align:center;">
+        Connecting to GitHub Data Source...
     </div>
 
     <div class="setup-grid">
-        <div class="input-box"><label>Current Age</label><input type="number" id="age" value="35"></div>
-        <div class="input-box"><label>Retirement Age</label><input type="number" id="retAge" value="67"></div>
-        <div class="input-box"><label>Current Balance ($)</label><input type="number" id="balance" value="100000"></div>
-        <div class="input-box"><label>Annual Salary ($)</label><input type="number" id="salary" value="100000"></div>
-        <div class="input-box"><label>SG Rate (%)</label><input type="number" id="sgRate" value="12"></div>
+        <div><label>Age</label><input type="number" id="age" value="35"></div>
+        <div><label>Retire Age</label><input type="number" id="retAge" value="67"></div>
+        <div><label>Balance ($)</label><input type="number" id="balance" value="100000"></div>
+        <div><label>Salary ($)</label><input type="number" id="salary" value="100000"></div>
+        <div><label>SG Rate (%)</label><input type="number" id="sgRate" value="12"></div>
     </div>
 
     <div class="comparison-grid">
-        <div class="pane a">
-            <h3>Primary Choice</h3>
+        <div class="pane">
+            <h3>Primary Fund</h3>
             <select id="fundA" onchange="updateOptions('A')">
                 <option value="cbus_super">Cbus - Super</option>
-                <option value="cbus_ttr">Cbus - TTR</option>
-                <option value="cbus_retired">Cbus - Fully Retired</option>
                 <option value="aus_super">AustralianSuper</option>
+                <option value="hostplus">Hostplus</option>
                 <option value="aware">Aware Super</option>
                 <option value="art">ART</option>
-                <option value="hostplus">Hostplus</option>
-                <option value="brighter">Brighter Super</option>
                 <option value="bussq">BUSSQ</option>
-                <option value="plum">Plum (MLC)</option>
             </select>
-            <label style="margin-top:15px; display:block; font-size:11px; font-weight:bold;">INVESTMENT OPTION</label>
-            <select id="optA"></select>
+            <select id="optA" style="margin-top:15px;"></select>
         </div>
-
-        <div class="pane b">
+        <div class="pane">
             <h3>Comparison Fund</h3>
             <select id="fundB" onchange="updateOptions('B')">
                 <option value="hostplus">Hostplus</option>
                 <option value="aus_super">AustralianSuper</option>
+                <option value="cbus_super">Cbus - Super</option>
                 <option value="aware">Aware Super</option>
                 <option value="art">ART</option>
                 <option value="bussq">BUSSQ</option>
-                <option value="cbus_super">Cbus - Super</option>
             </select>
-            <label style="margin-top:15px; display:block; font-size:11px; font-weight:bold;">INVESTMENT OPTION</label>
-            <select id="optB"></select>
+            <select id="optB" style="margin-top:15px;"></select>
         </div>
     </div>
 
-    <button onclick="calculate()">GENERATE 2026 PROJECTION</button>
-    <div id="resultsArea" style="display:none; margin-top:40px;">
-        <canvas id="compChart"></canvas>
-    </div>
+    <button onclick="calculate()">GENERATE PROJECTION</button>
+    <canvas id="compChart" style="margin-top:30px;"></canvas>
 </div>
 
 <script>
-const GITHUB_USER = "brentonmuller";
-const GITHUB_REPO = "United-Calcs";
-// Corrected Base URL to look into your 'calculators' folder
-const DATA_PATH = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/calculators/`;
+const BASE_URL = "https://raw.githubusercontent.com/brentonmuller/United-Calcs/main/calculators/";
 
 const FILE_MAP = {
     cbus_super: "CBUS Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
-    cbus_ttr: "CBUS TTR Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
-    cbus_retired: "CBUS Fully Retired Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
     hostplus: "Hostplus 31 Jan 26.xlsx - Sheet1.csv",
     aware: "Aware 31 Jan 26.xlsx - Sheet1.csv",
     art: "ART 31 Jan 26.xlsx - Sheet1.csv",
-    plum: "Plum Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
     bussq: "BUSSQ Investment Returns 31 Dec 25.xlsx - Sheet1.csv",
-    aus_super: "Aus Super Returns 30 June 25.xlsx - Sheet1.csv",
-    brighter: "Brighter Investment returns 31 Jan 26.xlsx - Sheet1.csv"
+    aus_super: "Aus Super Returns 30 June 25.xlsx - Sheet1.csv"
 };
 
 let remoteData = {};
 let chart = null;
 
 async function init() {
-    const status = document.getElementById('status-bar');
-    let loadedCount = 0;
-
+    let loaded = 0;
     for (let key in FILE_MAP) {
         try {
-            // Encode the URL to handle spaces in file names correctly
-            const url = DATA_PATH + encodeURIComponent(FILE_MAP[key]);
-            const response = await fetch(url);
-            if (response.ok) {
-                const csvText = await response.text();
-                const parsed = parseFuzzyCSV(csvText);
-                if (Object.values(parsed).some(g => g.length > 0)) {
-                    remoteData[key] = parsed;
-                    loadedCount++;
-                }
+            const url = BASE_URL + encodeURIComponent(FILE_MAP[key]);
+            const res = await fetch(url);
+            if (res.ok) {
+                const csv = await res.text();
+                remoteData[key] = parseData(csv);
+                loaded++;
             }
-        } catch (e) { console.warn("Failed: " + key); }
+        } catch (e) { console.error("Error loading: " + key); }
     }
 
-    if (loadedCount === 0) {
-        status.className = "error";
-        status.innerHTML = "❌ DATA ERROR: No files found. Check your GitHub folder name matches 'calculators' exactly.";
+    if (loaded === 0) {
+        const s = document.getElementById('status');
+        s.innerHTML = "❌ DATA ERROR: Could not find files. Check if folder is named 'calculators' or 'Calculators'.";
+        s.className = "error-box";
     } else {
-        status.style.display = 'none';
+        document.getElementById('status').style.display = 'none';
         updateOptions('A'); updateOptions('B');
     }
 }
 
-function parseFuzzyCSV(csv) {
-    const rows = Papa.parse(csv, { header: false, skipEmptyLines: true, relaxQuotes: true }).data;
+function parseData(csv) {
+    const rows = Papa.parse(csv, { header: false, skipEmptyLines: true }).data;
     const groups = { "10yr": [], "5yr": [], "3yr": [], "1yr": [] };
-    let colIdx = { "10yr": -1, "5yr": -1, "3yr": -1, "1yr": -1 };
+    let cols = { "10yr": -1, "5yr": -1, "3yr": -1, "1yr": -1 };
 
-    // 1. Search for headers
     rows.forEach(row => {
         row.forEach((cell, i) => {
             if (!cell) return;
             let c = cell.toString().toLowerCase().replace(/\s/g, '');
-            if (c.includes("10year") || c.includes("10yr")) colIdx["10yr"] = i;
-            if (c.includes("5year") || c.includes("5yr")) colIdx["5yr"] = i;
-            if (c.includes("3year") || c.includes("3yr")) colIdx["3yr"] = i;
-            if (c.includes("1year") || (c.includes("1yr") && !c.includes("3yr"))) colIdx["1yr"] = i;
+            if (c.includes("10year") || c.includes("10yr")) cols["10yr"] = i;
+            if (c.includes("5year") || c.includes("5yr")) cols["5yr"] = i;
+            if (c.includes("3year") || c.includes("3yr")) cols["3yr"] = i;
+            if (c.includes("1year") || (c.includes("1yr") && !c.includes("3yr"))) cols["1yr"] = i;
         });
     });
 
-    // 2. Extract Data
     rows.forEach(row => {
-        // Skips empty cells at start (e.g. BUSSQ) and finds the option name
-        let name = row.find(c => {
-            if (!c || c.toString().trim().length < 3) return false;
-            let v = c.toString().toLowerCase();
-            return !v.includes("year") && isNaN(parseFloat(v.replace('%','')));
-        });
-
+        let name = row.find(c => c && c.length > 3 && isNaN(parseFloat(c.toString().replace('%',''))) && !c.toLowerCase().includes("year"));
         if (!name) return;
-
         ["10yr", "5yr", "3yr", "1yr"].forEach(tf => {
-            let idx = colIdx[tf];
-            if (idx !== -1 && row[idx]) {
-                let raw = row[idx].toString();
-                let clean = raw.replace(/[^0-9.-]/g, '');
-                let n = parseFloat(clean);
+            if (cols[tf] !== -1 && row[cols[tf]]) {
+                let n = parseFloat(row[cols[tf]].toString().replace(/[^0-9.-]/g, ''));
                 if (!isNaN(n) && n !== 0) {
-                    let rate = (n > 0.5 || raw.includes('%')) ? n / 100 : n;
-                    groups[tf].push({ name: name.trim(), rate: rate });
+                    let rate = (n > 0.5 || row[cols[tf]].toString().includes('%')) ? n / 100 : n;
+                    groups[tf].push({ name: name.trim(), rate });
                 }
             }
         });
@@ -177,16 +136,15 @@ function parseFuzzyCSV(csv) {
 }
 
 function updateOptions(pane) {
-    const fundKey = document.getElementById('fund' + pane).value;
+    const fund = document.getElementById('fund' + pane).value;
     const select = document.getElementById('opt' + pane);
     select.innerHTML = "";
-    if (!remoteData[fundKey]) return;
-
+    if (!remoteData[fund]) return;
     ["10yr", "5yr", "3yr", "1yr"].forEach(tf => {
-        if (remoteData[fundKey][tf].length > 0) {
+        if (remoteData[fund][tf].length > 0) {
             const grp = document.createElement('optgroup');
-            grp.label = tf.replace('yr', ' Year Return');
-            remoteData[fundKey][tf].forEach(o => {
+            grp.label = tf.replace('yr', ' Year History');
+            remoteData[fund][tf].forEach(o => {
                 const opt = document.createElement('option');
                 opt.value = o.rate;
                 opt.textContent = `${o.name} (${(o.rate * 100).toFixed(2)}%)`;
@@ -202,9 +160,6 @@ function calculate() {
     const retAge = parseInt(document.getElementById('retAge').value);
     const rA = parseFloat(document.getElementById('optA').value);
     const rB = parseFloat(document.getElementById('optB').value);
-    
-    if (isNaN(rA) || isNaN(rB)) { alert("Select investment options first."); return; }
-
     let bA = parseFloat(document.getElementById('balance').value);
     let bB = bA;
     let sal = parseFloat(document.getElementById('salary').value);
@@ -218,7 +173,6 @@ function calculate() {
         bB = (bB + con/2) * (1 + rB) + con/2;
         sal *= 1.03;
     }
-    document.getElementById('resultsArea').style.display = 'block';
     renderChart(labels, dA, dB);
 }
 
@@ -230,13 +184,11 @@ function renderChart(labels, dA, dB) {
         data: {
             labels,
             datasets: [
-                { label: 'Primary Fund', data: dA, borderColor: '#002e6d', fill: false },
-                { label: 'Comparison Fund', data: dB, borderColor: '#e53e3e', fill: false }
+                { label: 'Primary', data: dA, borderColor: '#002e6d', fill: false },
+                { label: 'Comparison', data: dB, borderColor: '#e53e3e', fill: false }
             ]
         },
-        options: {
-            scales: { y: { ticks: { callback: v => '$' + v.toLocaleString() } } }
-        }
+        options: { scales: { y: { ticks: { callback: v => '$' + v.toLocaleString() } } } }
     });
 }
 init();
