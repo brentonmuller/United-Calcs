@@ -3,32 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <title>Strategic Wealth Projection 2026</title>
-    <link rel="icon" href="data:;base64,iVBORw0KGgo="> <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        :root { --cbus-navy: #002e6d; --cbus-green: #71B44D; --cbus-light: #f4f8fb; --comp-red: #e53e3e; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--cbus-light); color: #2c3e50; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-top: 10px solid var(--cbus-navy); }
+        :root { --navy: #002e6d; --green: #71B44D; --bg: #f4f8fb; --red: #e53e3e; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #2c3e50; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-top: 10px solid var(--navy); }
         .header { text-align: center; margin-bottom: 30px; }
         .setup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 30px; padding: 20px; background: #f9f9f9; border-radius: 8px; }
-        .input-box label { display: block; font-size: 11px; font-weight: bold; color: var(--cbus-navy); text-transform: uppercase; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
+        .input-box label { display: block; font-size: 11px; font-weight: bold; color: var(--navy); text-transform: uppercase; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
         .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
         .pane { padding: 20px; border: 2px solid #eee; border-radius: 10px; }
-        .pane.a { border-color: var(--cbus-navy); }
-        .pane.b { border-color: var(--comp-red); }
-        button { width: 100%; padding: 15px; background: var(--cbus-navy); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        #loader { font-weight: bold; color: #d9534f; text-align: center; padding: 10px; background: #f2dede; border-radius: 5px; margin-bottom: 20px; }
+        .pane.a { border-color: var(--navy); }
+        .pane.b { border-color: var(--red); }
+        button { width: 100%; padding: 15px; background: var(--navy); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        #status-msg { font-weight: bold; text-align: center; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .error { background: #f2dede; color: #a94442; border: 1px solid #ebccd1; }
+        .loading { background: #d9edf7; color: #31708f; border: 1px solid #bce8f1; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h1 style="color: var(--cbus-navy); margin:0;">STRATEGIC <span>COMPARISON</span></h1>
+        <h1 style="color: var(--navy); margin:0;">STRATEGIC <span>PROJECTION TOOL</span></h1>
+        <p style="margin-top: 5px; font-size: 14px; color: #666;">Brenton Muller / United-Calcs</p>
     </div>
 
-    <div id="loader">Checking Connection to GitHub...</div>
+    <div id="status-msg" class="loading">Establishing connection to GitHub United-Calcs repo...</div>
 
     <div class="setup-grid">
         <div class="input-box"><label>Current Age</label><input type="number" id="age" value="35"></div>
@@ -54,7 +58,7 @@
                 <option value="plum">Plum (MLC)</option>
             </select>
             <label style="margin-top:10px; display:block; font-size:12px;">Investment Option</label>
-            <select id="optA"></select>
+            <select id="optA"><option>Loading...</option></select>
         </div>
 
         <div class="pane b">
@@ -70,7 +74,7 @@
                 <option value="plum">Plum (MLC)</option>
             </select>
             <label style="margin-top:10px; display:block; font-size:12px;">Investment Option</label>
-            <select id="optB"></select>
+            <select id="optB"><option>Loading...</option></select>
         </div>
     </div>
 
@@ -81,9 +85,9 @@
 </div>
 
 <script>
-// IMPORTANT: Change these two lines
-const GITHUB_USER = "brentonmuller"; 
-const GITHUB_REPO = "United-Calcs";
+const USER = "brentonmuller"; 
+const REPO = "United-Calcs";
+const FOLDER = "calculators";
 
 const FILE_MAP = {
     cbus_super: "CBUS Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
@@ -102,46 +106,49 @@ let remoteData = {};
 let chart = null;
 
 async function init() {
-    const loader = document.getElementById('loader');
-    const baseUrl = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/calculators/`;
+    const status = document.getElementById('status-msg');
     
-    let loadedCount = 0;
-    for (let key in FILE_MAP) {
-        try {
-            const url = baseUrl + encodeURIComponent(FILE_MAP[key]);
-            const response = await fetch(url);
-            
-            if (!response.ok) {
-                console.error(`Failed: ${FILE_MAP[key]} at ${url}`);
-                continue;
-            }
-
-            const csvText = await response.text();
-            const data = parseData(csvText);
-            
-            // Check if we actually found data inside the file
-            if (Object.values(data).some(arr => arr.length > 0)) {
-                remoteData[key] = data;
-                loadedCount++;
-            }
-        } catch (e) { console.error(e); }
+    // Auto-detect branch (main vs master)
+    let branch = "main";
+    let testUrl = `https://raw.githubusercontent.com/${USER}/${REPO}/main/${FOLDER}/${encodeURIComponent(FILE_MAP.hostplus)}`;
+    let testReq = await fetch(testUrl);
+    if (!testReq.ok) {
+        branch = "master";
+        console.log("Main branch not found, trying master...");
     }
 
-    if (loadedCount === 0) {
-        loader.innerHTML = "❌ ERROR: No data files found. Check your GitHub Username and Repo Name in the code.";
+    const baseUrl = `https://raw.githubusercontent.com/${USER}/${REPO}/${branch}/${FOLDER}/`;
+    let count = 0;
+
+    for (let key in FILE_MAP) {
+        try {
+            const response = await fetch(baseUrl + encodeURIComponent(FILE_MAP[key]));
+            if (response.ok) {
+                const csvText = await response.text();
+                const parsed = parseFlexibleCSV(csvText);
+                if (Object.values(parsed).some(a => a.length > 0)) {
+                    remoteData[key] = parsed;
+                    count++;
+                }
+            }
+        } catch (e) { console.warn("Skip: " + key); }
+    }
+
+    if (count === 0) {
+        status.className = "error";
+        status.innerHTML = "❌ ACCESS DENIED: Ensure your GitHub Repo 'United-Calcs' is set to PUBLIC in Settings.";
     } else {
-        loader.style.display = 'none';
-        updateOptions('A'); 
-        updateOptions('B');
+        status.style.display = 'none';
+        updateOptions('A'); updateOptions('B');
     }
 }
 
-function parseData(csv) {
-    const rows = Papa.parse(csv, { header: false, skipEmptyLines: true }).data;
+function parseFlexibleCSV(csv) {
+    const rows = Papa.parse(csv, { header: false, skipEmptyLines: true, relaxQuotes: true }).data;
     const groups = { "10yr": [], "5yr": [], "3yr": [], "1yr": [] };
     let colIdx = { "10yr": -1, "5yr": -1, "3yr": -1, "1yr": -1 };
 
-    // 1. Map columns
+    // Column Finder
     rows.forEach(row => {
         row.forEach((cell, i) => {
             if (!cell) return;
@@ -153,27 +160,23 @@ function parseData(csv) {
         });
     });
 
-    // 2. Extract rows
+    // Row Extractor
     rows.forEach(row => {
-        // Name is the first cell that looks like an investment option
-        let name = row.find(c => c && c.length > 3 && isNaN(parseFloat(c.toString().replace('%',''))) && !c.toLowerCase().includes("year"));
-        if (!name) return;
+        let nameCell = row.find(c => c && c.length > 3 && isNaN(parseFloat(c.toString().replace('%',''))) && !c.toLowerCase().includes("year") && !c.toLowerCase().includes("mth"));
+        if (!nameCell) return;
 
         ["10yr", "5yr", "3yr", "1yr"].forEach(tf => {
             if (colIdx[tf] !== -1 && row[colIdx[tf]]) {
-                let rate = cleanRate(row[colIdx[tf]]);
-                if (!isNaN(rate) && rate !== 0) groups[tf].push({ name: name.trim(), rate });
+                let val = row[colIdx[tf]].toString().replace(/[^0-9.-]/g, '');
+                let n = parseFloat(val);
+                if (!isNaN(n) && n !== 0) {
+                    let rate = (n > 0.5 || row[colIdx[tf]].toString().includes('%')) ? n / 100 : n;
+                    groups[tf].push({ name: nameCell.trim(), rate });
+                }
             }
         });
     });
     return groups;
-}
-
-function cleanRate(val) {
-    let s = val.toString().replace(/[^0-9.-]/g, '');
-    let n = parseFloat(s);
-    if (isNaN(n)) return NaN;
-    return (n > 0.5 || val.toString().includes('%')) ? n / 100 : n;
 }
 
 function updateOptions(pane) {
@@ -181,19 +184,13 @@ function updateOptions(pane) {
     const select = document.getElementById('opt' + pane);
     select.innerHTML = "";
     const data = remoteData[fundKey];
-    
-    if (!data) {
-        const opt = document.createElement('option');
-        opt.textContent = "Data not loaded";
-        select.appendChild(opt);
-        return;
-    }
+    if (!data) return;
 
     const seen = new Set();
     ["10yr", "5yr", "3yr", "1yr"].forEach(tf => {
         if (data[tf].length > 0) {
             const grp = document.createElement('optgroup');
-            grp.label = tf.replace('yr', ' Year History');
+            grp.label = tf.replace('yr', ' Year Performance');
             data[tf].forEach(o => {
                 if (!seen.has(o.name)) {
                     const opt = document.createElement('option');
@@ -213,6 +210,7 @@ function calculate() {
     const retAge = parseInt(document.getElementById('retAge').value);
     const rateA = parseFloat(document.getElementById('optA').value);
     const rateB = parseFloat(document.getElementById('optB').value);
+    
     if (isNaN(rateA) || isNaN(rateB)) { alert("Please select an investment option for both funds."); return; }
 
     let balA = parseFloat(document.getElementById('balance').value);
@@ -240,14 +238,16 @@ function renderChart(labels, dataA, dataB) {
         data: {
             labels,
             datasets: [
-                { label: 'Primary Choice', data: dataA, borderColor: '#002e6d', fill: false },
-                { label: 'Comparison Fund', data: dataB, borderColor: '#e53e3e', fill: false }
+                { label: 'Primary Fund', data: dataA, borderColor: '#002e6d', fill: false, tension: 0.1 },
+                { label: 'Comparison Fund', data: dataB, borderColor: '#e53e3e', fill: false, tension: 0.1 }
             ]
+        },
+        options: {
+            scales: { y: { ticks: { callback: v => '$' + v.toLocaleString() } } }
         }
     });
 }
 init();
 </script>
 </body>
-
 </html>
