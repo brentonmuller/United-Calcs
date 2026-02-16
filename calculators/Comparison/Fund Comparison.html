@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Strategic Wealth Projection 2026 - Data Verified</title>
+    <title>Strategic Wealth Projection 2026 - GitHub Sync</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         :root {
             --cbus-navy: #002e6d;
@@ -41,14 +42,22 @@
         .bal-a { font-weight: bold; color: var(--cbus-navy); }
         .bal-b { font-weight: bold; color: var(--comp-red); }
         optgroup { font-weight: bold; color: var(--cbus-navy); font-style: normal; background: #f0f4f8; }
+        
+        #loadingOverlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(255,255,255,0.9); display: flex; align-items: center; 
+            justify-content: center; z-index: 1000; font-weight: bold; color: var(--cbus-navy);
+        }
     </style>
 </head>
 <body>
 
+<div id="loadingOverlay">Synchronizing with GitHub Data...</div>
+
 <div class="container">
     <div class="header">
         <div class="logo-placeholder">STRATEGIC <span>COMPARISON</span></div>
-        <p>Projected Wealth Analysis based on Longest Available Data Points (Dec 2025/Jan 2026)</p>
+        <p>Projected Wealth Analysis based on GitHub Hosted Data (/calculators)</p>
     </div>
 
     <div class="setup-grid">
@@ -64,29 +73,39 @@
     <div class="fund-comparison-grid">
         <div class="fund-pane a">
             <h3>Primary Choice</h3>
-            <label>Select Super Fund</label>
+            <label>Select Account Type</label>
             <select id="fundA" onchange="updateOptions('A')">
-                <option value="cbus">Cbus</option>
-                <option value="plum">Plum (MLC)</option>
-                <option value="ausSuper">AustralianSuper</option>
+                <option value="cbus_super">CBUS - Super (MySuper)</option>
+                <option value="cbus_ttr">CBUS - Transition to Retirement</option>
+                <option value="cbus_retired">CBUS - Fully Retired</option>
+                <option value="aus_super">AustralianSuper</option>
+                <option value="aware">Aware Super</option>
+                <option value="art">ART</option>
+                <option value="hostplus">Hostplus</option>
                 <option value="brighter">Brighter Super</option>
                 <option value="bussq">BUSSQ</option>
+                <option value="plum">Plum (MLC)</option>
             </select>
-            <label style="margin-top:10px; display:block;">Investment Option (By Data Availability)</label>
+            <label style="margin-top:10px; display:block;">Investment Option (By Longest Available)</label>
             <select id="optA"></select>
         </div>
 
         <div class="fund-pane b">
             <h3>Comparison Fund</h3>
-            <label>Select Super Fund</label>
+            <label>Select Account Type</label>
             <select id="fundB" onchange="updateOptions('B')">
-                <option value="plum">Plum (MLC)</option>
-                <option value="cbus">Cbus</option>
-                <option value="ausSuper">AustralianSuper</option>
+                <option value="hostplus">Hostplus</option>
+                <option value="cbus_super">CBUS - Super (MySuper)</option>
+                <option value="cbus_ttr">CBUS - Transition to Retirement</option>
+                <option value="cbus_retired">CBUS - Fully Retired</option>
+                <option value="aus_super">AustralianSuper</option>
+                <option value="aware">Aware Super</option>
+                <option value="art">ART</option>
                 <option value="brighter">Brighter Super</option>
                 <option value="bussq">BUSSQ</option>
+                <option value="plum">Plum (MLC)</option>
             </select>
-            <label style="margin-top:10px; display:block;">Investment Option (By Data Availability)</label>
+            <label style="margin-top:10px; display:block;">Investment Option (By Longest Available)</label>
             <select id="optB"></select>
         </div>
     </div>
@@ -103,8 +122,8 @@
                 <tr>
                     <th>Age</th>
                     <th>Salary</th>
-                    <th>Primary Fund Balance</th>
-                    <th>Comparison Fund Balance</th>
+                    <th>Primary Balance</th>
+                    <th>Comparison Balance</th>
                     <th>Difference</th>
                 </tr>
             </thead>
@@ -114,108 +133,132 @@
 </div>
 
 <script>
-// Grouped Data based on longest available timeframe from provided CSVs
-const groupedData = {
-    cbus: {
-        "10 Years Data": [
-            { name: "High Growth", rate: 0.0965 },
-            { name: "Growth (MySuper)", rate: 0.0800 },
-            { name: "Conservative", rate: 0.0443 },
-            { name: "Cash", rate: 0.0195 }
-        ],
-        "5 Years Data": [
-            { name: "Conservative Growth", rate: 0.0531 }
-        ],
-        "3 Years Data": [
-            { name: "Overseas Shares", rate: 0.1898 },
-            { name: "Indexed Diversified", rate: 0.1198 },
-            { name: "Growth Plus", rate: 0.1103 },
-            { name: "Australian Shares", rate: 0.1089 },
-            { name: "Diversified Fixed Interest", rate: 0.0483 },
-            { name: "Property", rate: 0.0236 }
-        ]
-    },
-    plum: {
-        "10 Years Data": [
-            { name: "MLC Aggressive", rate: 0.1170 },
-            { name: "MLC High Growth", rate: 0.0950 },
-            { name: "MLC Growth", rate: 0.0830 },
-            { name: "MySuper Growth Portfolio", rate: 0.0750 },
-            { name: "MLC Balanced", rate: 0.0730 },
-            { name: "MLC Conservative Balanced", rate: 0.0600 },
-            { name: "MLC Stable", rate: 0.0440 }
-        ],
-        "5 Years Data": [
-            { name: "MySuper Conservative Balanced", rate: 0.0610 },
-            { name: "MySuper Cash Portfolio", rate: 0.0230 }
-        ]
-    },
-    ausSuper: {
-        "10 Years Data": [
-            { name: "International Shares", rate: 0.1102 },
-            { name: "Australian Shares", rate: 0.0993 },
-            { name: "High Growth", rate: 0.0884 },
-            { name: "Balanced", rate: 0.0794 },
-            { name: "Indexed Diversified", rate: 0.0761 },
-            { name: "Socially Aware", rate: 0.0713 },
-            { name: "Conservative Balanced", rate: 0.0623 },
-            { name: "Stable", rate: 0.0475 },
-            { name: "Cash", rate: 0.0203 },
-            { name: "Diversified Fixed Interest", rate: 0.0216 }
-        ]
-    },
-    brighter: {
-        "10 Years Data": [
-            { name: "Australian Shares", rate: 0.1040 },
-            { name: "MySuper", rate: 0.0795 },
-            { name: "Secure", rate: 0.0308 },
-            { name: "Cash", rate: 0.0227 }
-        ],
-        "7 Years Data": [
-            { name: "International Shares", rate: 0.1498 },
-            { name: "Growth", rate: 0.1058 },
-            { name: "Balanced", rate: 0.0909 },
-            { name: "Conservative Balanced", rate: 0.0704 },
-            { name: "Stable", rate: 0.0515 }
-        ],
-        "5 Years Data": [
-            { name: "Indexed Balanced", rate: 0.0875 },
-            { name: "Property", rate: 0.0416 },
-            { name: "Diversified Fixed Interest", rate: 0.0052 }
-        ]
-    },
-    bussq: {
-        "10 Years Data": [
-            { name: "Australian Small Companies", rate: 0.0975 },
-            { name: "International Shares", rate: 0.0837 },
-            { name: "Australian Shares", rate: 0.0822 },
-            { name: "High Growth", rate: 0.0780 },
-            { name: "International (Emg Mkts)", rate: 0.0709 },
-            { name: "Balanced Growth", rate: 0.0676 },
-            { name: "Defensive", rate: 0.0428 },
-            { name: "Cash", rate: 0.0195 }
-        ]
-    }
+/**
+ * GITHUB CONFIGURATION
+ * Replace these placeholder values with your specific repository details
+ */
+const GITHUB_CONFIG = {
+    user: "your-username", 
+    repo: "your-repo-name",
+    branch: "main",
+    folder: "calculators"
 };
 
+// Map internal IDs to exact CSV filenames for the three CBUS types and other funds
+const FUND_FILE_MAP = {
+    cbus_super: "CBUS Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
+    cbus_ttr: "CBUS TTR Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
+    cbus_retired: "CBUS Fully Retired Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
+    hostplus: "Hostplus 31 Jan 26.xlsx - Sheet1.csv",
+    aware: "Aware 31 Jan 26.xlsx - Sheet1.csv",
+    art: "ART 31 Jan 26.xlsx - Sheet1.csv",
+    plum: "Plum Investment Returns 31 Jan 26.xlsx - Sheet1.csv",
+    bussq: "BUSSQ Investment Returns 31 Dec 25.xlsx - Sheet1.csv",
+    aus_super: "Aus Super Returns 30 June 25.xlsx - Sheet1.csv",
+    brighter: "Brighter Investment returns 31 Jan 26.xlsx - Sheet1.csv"
+};
+
+let remoteData = {};
 let chart = null;
+
+async function init() {
+    const baseUrl = `https://raw.githubusercontent.com/${GITHUB_CONFIG.user}/${GITHUB_CONFIG.repo}/${GITHUB_CONFIG.branch}/${GITHUB_CONFIG.folder}/`;
+    
+    const fetchPromises = Object.entries(FUND_FILE_MAP).map(async ([key, fileName]) => {
+        try {
+            const response = await fetch(baseUrl + encodeURIComponent(fileName));
+            if (!response.ok) throw new Error(`Not found: ${fileName}`);
+            const csvText = await response.text();
+            remoteData[key] = processCSV(csvText);
+        } catch (err) {
+            console.warn(`Could not load ${fileName}:`, err);
+        }
+    });
+
+    await Promise.all(fetchPromises);
+    document.getElementById('loadingOverlay').style.display = 'none';
+    updateOptions('A');
+    updateOptions('B');
+}
+
+/**
+ * Parses CSV and sorts options into groups based on the longest available date range
+ */
+function processCSV(csvText) {
+    const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
+    const data = parsed.data;
+    const headers = parsed.meta.fields;
+
+    const grouped = {
+        "10 Years Data": [],
+        "7 Years Data": [],
+        "5 Years Data": [],
+        "3 Years Data": [],
+        "1 Year Data": []
+    };
+
+    const timeframeMap = [
+        { label: "10 Years Data", keys: ["10 years", "10 yrs", "10 yr"] },
+        { label: "7 Years Data",  keys: ["7 years", "7 yrs", "7 yr"] },
+        { label: "5 Years Data",  keys: ["5 years", "5 yrs", "5 yr"] },
+        { label: "3 Years Data",  keys: ["3 years", "3 yrs", "3 yr"] },
+        { label: "1 Year Data",   keys: ["1 year", "1 yr"] }
+    ];
+
+    data.forEach(row => {
+        // Investment name is typically the first key in the row
+        const firstHeader = headers[0];
+        const name = row[firstHeader];
+        if (!name || name.trim() === "" || name.includes("Ready-made") || name.includes("Single asset")) return;
+
+        for (const timeframe of timeframeMap) {
+            const matchingHeader = headers.find(h => 
+                timeframe.keys.some(k => h.toLowerCase().includes(k))
+            );
+
+            if (matchingHeader) {
+                let val = row[matchingHeader];
+                if (val && val !== "-" && !val.toString().toLowerCase().includes("n/a")) {
+                    const rate = parseFloat(val.toString().replace('%', '')) / (val.toString().includes('%') ? 100 : 1);
+                    if (!isNaN(rate)) {
+                        grouped[timeframe.label].push({ name: name.trim(), rate: rate });
+                        break; // Assign to the longest timeframe found and move to next row
+                    }
+                }
+            }
+        }
+    });
+
+    return grouped;
+}
 
 function updateOptions(pane) {
     const fund = document.getElementById('fund' + pane).value;
     const select = document.getElementById('opt' + pane);
     select.innerHTML = '';
     
-    for (const [groupName, options] of Object.entries(groupedData[fund])) {
-        const group = document.createElement('optgroup');
-        group.label = groupName;
-        options.forEach(o => {
-            const el = document.createElement('option');
-            el.value = o.rate;
-            el.textContent = `${o.name} (${(o.rate * 100).toFixed(2)}% p.a.)`;
-            group.appendChild(el);
-        });
-        select.appendChild(group);
+    const fundData = remoteData[fund];
+    if (!fundData) {
+        const opt = document.createElement('option');
+        opt.textContent = "Data Syncing...";
+        select.appendChild(opt);
+        return;
     }
+
+    const order = ["10 Years Data", "7 Years Data", "5 Years Data", "3 Years Data", "1 Year Data"];
+    order.forEach(groupName => {
+        if (fundData[groupName] && fundData[groupName].length > 0) {
+            const group = document.createElement('optgroup');
+            group.label = groupName;
+            fundData[groupName].forEach(o => {
+                const el = document.createElement('option');
+                el.value = o.rate;
+                el.textContent = `${o.name} (${(o.rate * 100).toFixed(2)}% p.a.)`;
+                group.appendChild(el);
+            });
+            select.appendChild(group);
+        }
+    });
 }
 
 function calculate() {
@@ -238,13 +281,7 @@ function calculate() {
         pathA.push(balA);
         pathB.push(balB);
 
-        rows += `<tr>
-            <td>${year}</td>
-            <td>$${Math.round(sal).toLocaleString()}</td>
-            <td class="bal-a">$${Math.round(balA).toLocaleString()}</td>
-            <td class="bal-b">$${Math.round(balB).toLocaleString()}</td>
-            <td>$${Math.round(Math.abs(balA - balB)).toLocaleString()}</td>
-        </tr>`;
+        rows += `<tr><td>${year}</td><td>$${Math.round(sal).toLocaleString()}</td><td class="bal-a">$${Math.round(balA).toLocaleString()}</td><td class="bal-b">$${Math.round(balB).toLocaleString()}</td><td>$${Math.round(Math.abs(balA - balB)).toLocaleString()}</td></tr>`;
 
         let annualContrib = ((sal * sg) + sSac) * 0.85; 
         balA = (balA + (annualContrib / 2)) * (1 + rateA) + (annualContrib / 2);
@@ -285,21 +322,13 @@ function renderChart(labels, dataA, dataB) {
         },
         options: {
             responsive: true,
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => `${ctx.dataset.label}: $${Math.round(ctx.parsed.y).toLocaleString()}`
-                    }
-                }
-            },
+            plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: $${Math.round(ctx.parsed.y).toLocaleString()}` } } },
             scales: { y: { ticks: { callback: v => '$' + v.toLocaleString() } } }
         }
     });
 }
 
-// Initialize
-updateOptions('A');
-updateOptions('B');
+init();
 </script>
 </body>
 </html>
