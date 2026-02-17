@@ -127,118 +127,195 @@
  * Logic: Priority 10yr > 7yr > 5yr > 3yr > 1yr
  */
 const groupedData = {
-    cbus: {
-        "10 Year Performance": [
-            { name: "Growth (Cbus MySuper)", rate: 0.0834 },
-            { name: "High Growth", rate: 0.1005 },
-            { name: "Conservative Growth", rate: 0.0638 },
-            { name: "Conservative", rate: 0.0463 },
-            { name: "Cash", rate: 0.0210 }
-        ],
-        "Short-term Performance (No 10yr available)": [
-            { name: "Overseas Shares (3yr)", rate: 0.1709 },
-            { name: "Australian Shares (3yr)", rate: 0.1105 },
-            { name: "Property (1yr)", rate: 0.0573 }
-        ]
-    },
-    cbusTTR: {
-        "10 Year Performance": [
-            { name: "Growth", rate: 0.0818 },
-            { name: "High Growth", rate: 0.0988 },
-            { name: "Conservative", rate: 0.0441 }
-        ],
-        "Short-term Performance (No 10yr available)": [
-            { name: "Overseas Shares (3yr)", rate: 0.1709 },
-            { name: "Australian Shares (3yr)", rate: 0.1105 }
-        ]
-    },
-    cbusRetired: {
-        "10 Year Performance": [
-            { name: "Growth", rate: 0.0911 },
-            { name: "High Growth", rate: 0.1118 },
-            { name: "Conservative", rate: 0.0503 }
-        ],
-        "Short-term Performance (No 10yr available)": [
-            { name: "Overseas Shares (3yr)", rate: 0.1912 },
-            { name: "Australian Shares (3yr)", rate: 0.1232 }
-        ]
-    },
-    art: {
-        "10 Year Performance": [
-            { name: "High Growth", rate: 0.098 },
-            { name: "Growth", rate: 0.089 },
-            { name: "Balanced", rate: 0.082 },
-            { name: "Socially Responsible", rate: 0.082 },
-            { name: "Shares", rate: 0.099 },
-            { name: "Retired Balanced", rate: 0.092 }
-        ]
-    },
-    ausSuper: {
-        "10 Year Performance": [
-            { name: "Balanced", rate: 0.0794 },
-            { name: "High Growth", rate: 0.0884 },
-            { name: "Socially Aware", rate: 0.0818 },
-            { name: "Indexed Diversified", rate: 0.0772 },
-            { name: "Stable", rate: 0.0531 },
-            { name: "International Shares", rate: 0.1102 },
-            { name: "Australian Shares", rate: 0.0993 }
-        ]
-    },
-    aware: {
-        "10 Year Performance": [
-            { name: "High Growth", rate: 0.0954 },
-            { name: "Growth", rate: 0.0861 },
-            { name: "Balanced", rate: 0.0773 },
-            { name: "Socially Conscious", rate: 0.0818 }
-        ],
-        "7 Year Performance": [
-            { name: "Indexed Growth", rate: 0.0913 }
-        ]
-    },
-    hostplus: {
-        "10 Year Performance": [
-            { name: "Balanced", rate: 0.0881 },
-            { name: "Shares Plus", rate: 0.1013 },
-            { name: "Socially Responsible", rate: 0.0863 },
-            { name: "Indexed Balanced", rate: 0.0768 },
-            { name: "Australian Shares", rate: 0.0893 },
-            { name: "International Shares", rate: 0.1065 }
-        ]
-    },
-    brighter: {
-        "10 Year Performance": [
-            { name: "MySuper / Accumulation", rate: 0.0795 },
-            { name: "Growth", rate: 0.0838 },
-            { name: "Balanced", rate: 0.0740 },
-            { name: "Stable", rate: 0.0583 },
-            { name: "Secure", rate: 0.0308 },
-            { name: "Australian Shares", rate: 0.1040 },
-            { name: "International Shares", rate: 0.1017 }
-        ]
-    },
-    bussq: {
-        "10 Year Performance": [
-            { name: "MySuper (Balanced Growth)", rate: 0.0734 },
-            { name: "High Growth", rate: 0.0837 },
-            { name: "Conservative Growth", rate: 0.0637 },
-            { name: "Australian Shares", rate: 0.0874 },
-            { name: "International Shares", rate: 0.0910 }
-        ],
-        "Short-term Performance (No 10yr available)": [
-            { name: "Australian Small Co (7yr)", rate: 0.1040 },
-            { name: "Emerging Markets (5yr)", rate: 0.0381 }
-        ]
-    },
-    plum: {
-        "10 Year Performance": [
-            { name: "MySuper Growth", rate: 0.0770 },
-            { name: "MLC Aggressive", rate: 0.1160 },
-            { name: "MLC High Growth", rate: 0.0960 },
-            { name: "MLC Growth", rate: 0.0850 },
-            { name: "MLC Balanced", rate: 0.0740 },
-            { name: "MLC Moderate", rate: 0.0590 }
-        ]
-    }
+  ausSuper: {
+    "10 Year Performance": [
+      { name: "Balanced", rate: 0.0794 },
+      { name: "High Growth", rate: 0.0884 },
+      { name: "Socially Aware", rate: 0.0713 },
+      { name: "Indexed Diversified", rate: 0.0761 },
+      { name: "Conservative Balanced", rate: 0.0623 },
+      { name: "Stable", rate: 0.0475 },
+      { name: "Australian Shares", rate: 0.0993 },
+      { name: "International Shares", rate: 0.1102 },
+      { name: "Diversified Fixed Interest", rate: 0.0216 },
+      { name: "Cash", rate: 0.0203 }
+    ]
+  },
+  plum: {
+    "10 Year Performance": [
+      { name: "MySuper Growth Portfolio", rate: 0.079 },
+      { name: "MLC Aggressive", rate: 0.125 },
+      { name: "MLC High Growth", rate: 0.101 },
+      { name: "MLC Growth", rate: 0.087 },
+      { name: "MLC Balanced", rate: 0.077 },
+      { name: "MLC Conservative Balanced", rate: 0.062 },
+      { name: "MLC Stable", rate: 0.045 }
+    ],
+    "5 Year Performance": [
+      { name: "MySuper Conservative Balanced Portfolio", rate: 0.06 },
+      { name: "MySuper Cash Portfolio", rate: 0.023 }
+    ]
+  },
+  bussq: {
+    "10 Year Performance": [
+      { name: "Balanced Growth", rate: 0.0676 },
+      { name: "Cash", rate: 0.0195 },
+      { name: "Defensive", rate: 0.0428 },
+      { name: "High Growth", rate: 0.078 },
+      { name: "Australian Shares", rate: 0.0822 },
+      { name: "International Shares", rate: 0.0837 },
+      { name: "Australian Small Company Shares", rate: 0.0975 },
+      { name: "International (Emg Mkts) Shares", rate: 0.0709 }
+    ]
+  },
+  cbus: {
+    "10 Year Performance": [
+      { name: "Growth (MySuper)", rate: 0.0822 },
+      { name: "High Growth", rate: 0.1003 },
+      { name: "Conservative", rate: 0.0449 },
+      { name: "Cash", rate: 0.0196 }
+    ],
+    "5 Year Performance": [
+      { name: "Conservative Growth", rate: 0.0535 }
+    ],
+    "3 Year Performance": [
+      { name: "Growth Plus", rate: 0.0987 },
+      { name: "Indexed Diversified", rate: 0.1073 },
+      { name: "Overseas Shares", rate: 0.1665 },
+      { name: "Australian Shares", rate: 0.0921 },
+      { name: "Property", rate: 0.018 },
+      { name: "Diversified Fixed Interest", rate: 0.0414 }
+    ]
+  },
+  cbusTTR: {
+    "7 Year Performance": [
+      { name: "Conservative Growth (default)", rate: 0.0595 },
+      { name: "High Growth", rate: 0.0974 },
+      { name: "Growth", rate: 0.0789 },
+      { name: "Conservative", rate: 0.0413 },
+      { name: "Cash", rate: 0.0212 }
+    ],
+    "3 Year Performance": [
+      { name: "Growth Plus", rate: 0.0982 },
+      { name: "Indexed Diversified", rate: 0.1072 },
+      { name: "Overseas Shares", rate: 0.167 },
+      { name: "Australian Shares", rate: 0.0926 },
+      { name: "Property", rate: 0.016 },
+      { name: "Diversified Fixed Interest", rate: 0.0414 }
+    ]
+  },
+  cbusRetired: {
+    "10 Year Performance": [
+      { name: "Conservative Growth (default)", rate: 0.0719 },
+      { name: "High Growth", rate: 0.111 },
+      { name: "Growth", rate: 0.0915 },
+      { name: "Conservative", rate: 0.0502 },
+      { name: "Cash", rate: 0.0232 }
+    ],
+    "3 Year Performance": [
+      { name: "Growth Plus", rate: 0.1061 },
+      { name: "Indexed Diversified", rate: 0.1214 },
+      { name: "Overseas Shares", rate: 0.1815 },
+      { name: "Australian Shares", rate: 0.1027 },
+      { name: "Property", rate: 0.0169 },
+      { name: "Diversified Fixed Interest", rate: 0.0486 }
+    ]
+  },
+  brighter: {
+    "10 Year Performance": [
+      { name: "MySuper", rate: 0.0795 },
+      { name: "Secure", rate: 0.0308 },
+      { name: "Australian Shares", rate: 0.104 },
+      { name: "Property", rate: 0.0513 },
+      { name: "Diversified Fixed Interest", rate: 0.0192 },
+      { name: "Cash", rate: 0.0227 }
+    ],
+    "7 Year Performance": [
+      { name: "Growth", rate: 0.1058 },
+      { name: "Balanced", rate: 0.0909 },
+      { name: "Conservative Balanced", rate: 0.0704 },
+      { name: "Stable", rate: 0.0515 },
+      { name: "International Shares", rate: 0.1498 }
+    ],
+    "5 Year Performance": [
+      { name: "Indexed Balanced", rate: 0.0875 }
+    ]
+  },
+  aware: {
+    "10 Year Performance": [
+      { name: "High Growth", rate: 0.0976 },
+      { name: "Balanced", rate: 0.0834 },
+      { name: "Balanced Socially Conscious", rate: 0.0887 },
+      { name: "Conservative Balanced", rate: 0.066 },
+      { name: "Conservative", rate: 0.0538 },
+      { name: "Defensive", rate: 0.0415 },
+      { name: "Australian Shares", rate: 0.1036 },
+      { name: "International Shares", rate: 0.1271 },
+      { name: "Property", rate: 0.0593 },
+      { name: "Cash", rate: 0.0225 }
+    ],
+    "3 Year Performance": [
+      { name: "High Growth Socially Conscious", rate: 0.1218 },
+      { name: "High Growth Indexed", rate: 0.1358 },
+      { name: "Balanced Indexed", rate: 0.119 },
+      { name: "Bonds", rate: 0.0268 }
+    ]
+  },
+  art: {
+    "10 Year Performance": [
+      { name: "High Growth Pool", rate: 0.1013 },
+      { name: "Balanced Pool", rate: 0.0871 },
+      { name: "Cash Pool", rate: 0.0206 },
+      { name: "High Growth", rate: 0.1015 },
+      { name: "Balanced", rate: 0.088 },
+      { name: "Conservative-Balanced", rate: 0.0687 },
+      { name: "Conservative", rate: 0.0507 },
+      { name: "Balanced Risk-Adjusted", rate: 0.0646 },
+      { name: "Socially Conscious Balanced", rate: 0.0787 },
+      { name: "Balanced Index", rate: 0.0812 },
+      { name: "Australian Shares Index", rate: 0.1028 },
+      { name: "International Shares Hedged Index", rate: 0.1158 },
+      { name: "International Shares Unhedged Index", rate: 0.1217 },
+      { name: "Listed Property Index", rate: 0.0698 },
+      { name: "Bonds Index", rate: 0.0153 },
+      { name: "Cash", rate: 0.0224 }
+    ],
+    "7 Year Performance": [
+      { name: "Unlisted Assets", rate: 0.0795 }
+    ]
+  },
+  hostplus: {
+    "10 Year Performance": [
+      { name: "Growth", rate: 0.1023 },
+      { name: "Balanced", rate: 0.0898 },
+      { name: "Conservative", rate: 0.0688 },
+      { name: "Stable", rate: 0.0486 },
+      { name: "Indexed Balanced", rate: 0.0871 },
+      { name: "Cash", rate: 0.0204 },
+      { name: "Bonds", rate: 0.0227 },
+      { name: "Australian Shares", rate: 0.1037 },
+      { name: "International Shares", rate: 0.1176 }
+    ],
+    "7 Year Performance": [
+      { name: "SRI - Balanced", rate: 0.0852 },
+      { name: "International Shares - Indexed", rate: 0.1327 }
+    ],
+    "3 Year Performance": [
+      { name: "Bonds – Indexed", rate: 0.0288 },
+      { name: "Australian Shares – Indexed", rate: 0.0975 }
+    ],
+    "1 Year Performance": [
+      { name: "High Growth", rate: 0.0999 },
+      { name: "Defensive", rate: 0.0496 },
+      { name: "Indexed High Growth", rate: 0.0878 },
+      { name: "Indexed Growth", rate: 0.0886 },
+      { name: "Indexed Conservative", rate: 0.0703 },
+      { name: "Indexed Stable", rate: 0.0594 },
+      { name: "Indexed Defensive", rate: 0.05 },
+      { name: "SRI - High Growth", rate: 0.0871 },
+      { name: "SRI - Defensive", rate: 0.0444 }
+    ]
+  }
 };
 
 let chart = null;
