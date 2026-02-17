@@ -27,7 +27,7 @@
 <div class="card">
     <h2>🏗️ Cbus Retirement Income Projection</h2>
     <p style="font-size: 0.85em; color: #666; margin-bottom: 20px;">
-        Investment performance to 31 December 2025. Past performance is not a reliable indicator of future performance.
+        Investment performance to 31 January 2026. Past performance is not a reliable indicator of future performance.
     </p>
 
     <div class="grid">
@@ -98,29 +98,33 @@
 
 <script>
     const investmentData = {
-        retired: [
-            { name: "High Growth - 10.67% (10yr)", rate: 0.1067 },
-            { name: "Growth - 8.90% (10yr)", rate: 0.0890 },
-            { name: "Conservative Growth - 7.03% (10yr)", rate: 0.0703 },
-            { name: "Conservative - 4.95% (10yr)", rate: 0.0495 },
-            { name: "Indexed Diversified - 13.54% (3yr)", rate: 0.1354 },
-            { name: "Growth Plus - 11.90% (3yr)", rate: 0.1190 },
-            { name: "Overseas Shares - 20.78% (3yr)", rate: 0.2078 },
-            { name: "Australian Shares - 11.96% (3yr)", rate: 0.1196 },
-            { name: "Cash - 3.70% (3yr)", rate: 0.0370 }
-        ],
-        ttr: [
-            { name: "High Growth - 10.21% (7yr)", rate: 0.1021 },
-            { name: "Growth - 8.18% (7yr)", rate: 0.0818 },
-            { name: "Conservative Growth - 6.16% (7yr)", rate: 0.0616 },
-            { name: "Conservative - 4.27% (7yr)", rate: 0.0427 },
-            { name: "Indexed Diversified - 11.97% (3yr)", rate: 0.1197 },
-            { name: "Growth Plus - 10.97% (3yr)", rate: 0.1097 },
-            { name: "Overseas Shares - 19.04% (3yr)", rate: 0.1904 },
-            { name: "Australian Shares - 10.96% (3yr)", rate: 0.1096 },
-            { name: "Cash - 3.23% (3yr)", rate: 0.0323 }
-        ]
-    };
+  retired: [
+    { name: "Conservative Growth (default) - 7.19% (10yr)", rate: 0.071900 },
+    { name: "High Growth - 11.10% (10yr)", rate: 0.111000 },
+    { name: "Growth Plus - 10.61% (3yr)", rate: 0.106100 },
+    { name: "Growth - 9.15% (10yr)", rate: 0.091500 },
+    { name: "Indexed Diversified - 12.14% (3yr)", rate: 0.121400 },
+    { name: "Conservative - 5.02% (10yr)", rate: 0.050200 },
+    { name: "Overseas Shares - 18.15% (3yr)", rate: 0.181500 },
+    { name: "Australian Shares - 10.27% (3yr)", rate: 0.102700 },
+    { name: "Property - 1.69% (3yr)", rate: 0.016900 },
+    { name: "Diversified Fixed Interest - 4.86% (3yr)", rate: 0.048600 },
+    { name: "Cash - 2.32% (10yr)", rate: 0.023200 }
+  ],
+  ttr: [
+    { name: "Conservative Growth (default) - 5.95% (7yr)", rate: 0.059500 },
+    { name: "High Growth - 9.74% (7yr)", rate: 0.097400 },
+    { name: "Growth Plus - 9.82% (3yr)", rate: 0.098200 },
+    { name: "Growth - 7.89% (7yr)", rate: 0.078900 },
+    { name: "Indexed Diversified - 10.72% (3yr)", rate: 0.107200 },
+    { name: "Conservative - 4.13% (7yr)", rate: 0.041300 },
+    { name: "Overseas Shares - 16.70% (3yr)", rate: 0.167000 },
+    { name: "Australian Shares - 9.26% (3yr)", rate: 0.092600 },
+    { name: "Property - 1.60% (3yr)", rate: 0.016000 },
+    { name: "Diversified Fixed Interest - 4.14% (3yr)", rate: 0.041400 },
+    { name: "Cash - 2.12% (7yr)", rate: 0.021200 }
+  ]
+};
 
     function toggleIncomeInput() {
         const type = document.getElementById('incomeType').value;
