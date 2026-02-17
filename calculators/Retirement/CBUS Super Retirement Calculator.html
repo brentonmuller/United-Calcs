@@ -100,36 +100,36 @@
     const investmentData = {
   retired: {
     10: [
-      { name: "High Growth - 11.10% (10yr)", rate: 0.111000 },
-      { name: "Growth - 9.15% (10yr)", rate: 0.091500 },
-      { name: "Conservative Growth (default) - 7.19% (10yr)", rate: 0.071900 },
-      { name: "Conservative - 5.02% (10yr)", rate: 0.050200 },
-      { name: "Cash - 2.32% (10yr)", rate: 0.023200 }
+        { name: "High Growth", rate: 0.111000 },
+        { name: "Growth", rate: 0.091500 },
+        { name: "Conservative Growth (default)", rate: 0.071900 },
+        { name: "Conservative", rate: 0.050200 },
+        { name: "Cash", rate: 0.023200 }
     ],
     3: [
-      { name: "Overseas Shares - 18.15% (3yr)", rate: 0.181500 },
-      { name: "Indexed Diversified - 12.14% (3yr)", rate: 0.121400 },
-      { name: "Growth Plus - 10.61% (3yr)", rate: 0.106100 },
-      { name: "Australian Shares - 10.27% (3yr)", rate: 0.102700 },
-      { name: "Diversified Fixed Interest - 4.86% (3yr)", rate: 0.048600 },
-      { name: "Property - 1.69% (3yr)", rate: 0.016900 }
+        { name: "Overseas Shares", rate: 0.181500 },
+        { name: "Indexed Diversified", rate: 0.121400 },
+        { name: "Growth Plus", rate: 0.106100 },
+        { name: "Australian Shares", rate: 0.102700 },
+        { name: "Diversified Fixed Interest", rate: 0.048600 },
+        { name: "Property", rate: 0.016900 }
     ]
   },
   ttr: {
     7: [
-      { name: "High Growth - 9.74% (7yr)", rate: 0.097400 },
-      { name: "Growth - 7.89% (7yr)", rate: 0.078900 },
-      { name: "Conservative Growth (default) - 5.95% (7yr)", rate: 0.059500 },
-      { name: "Conservative - 4.13% (7yr)", rate: 0.041300 },
-      { name: "Cash - 2.12% (7yr)", rate: 0.021200 }
+        { name: "High Growth", rate: 0.097400 },
+        { name: "Growth", rate: 0.078900 },
+        { name: "Conservative Growth (default)", rate: 0.059500 },
+        { name: "Conservative", rate: 0.041300 },
+        { name: "Cash", rate: 0.021200 }
     ],
     3: [
-      { name: "Overseas Shares - 16.70% (3yr)", rate: 0.167000 },
-      { name: "Indexed Diversified - 10.72% (3yr)", rate: 0.107200 },
-      { name: "Growth Plus - 9.82% (3yr)", rate: 0.098200 },
-      { name: "Australian Shares - 9.26% (3yr)", rate: 0.092600 },
-      { name: "Diversified Fixed Interest - 4.14% (3yr)", rate: 0.041400 },
-      { name: "Property - 1.60% (3yr)", rate: 0.016000 }
+        { name: "Overseas Shares", rate: 0.167000 },
+        { name: "Indexed Diversified", rate: 0.107200 },
+        { name: "Growth Plus", rate: 0.098200 },
+        { name: "Australian Shares", rate: 0.092600 },
+        { name: "Diversified Fixed Interest", rate: 0.041400 },
+        { name: "Property", rate: 0.016000 }
     ]
   }
 };
@@ -158,21 +158,23 @@
   const type = document.getElementById('accountType').value;
   const strategySelect = document.getElementById('strategy');
   const grouped = investmentData[type];
+
   strategySelect.innerHTML = '';
 
-  // Sort groups by longest term first
+  // Longest term first
   const terms = Object.keys(grouped).map(Number).sort((a, b) => b - a);
 
   terms.forEach(term => {
     const og = document.createElement('optgroup');
     og.label = `${term} Year Record`;
 
-    // Items already stored highest-to-lowest, but sort defensively
+    // Highest return first within the term
     const items = grouped[term].slice().sort((a, b) => b.rate - a.rate);
 
     items.forEach(opt => {
       const el = document.createElement('option');
-      el.textContent = opt.name;
+      // Show option name + percentage; keep numeric rate as the value
+      el.textContent = `${opt.name} — ${(opt.rate * 100).toFixed(2)}% p.a.`;
       el.value = opt.rate;
       og.appendChild(el);
     });
@@ -181,7 +183,7 @@
   });
 }
 
-function getMinDrawdown(age) {(age) {
+function getMinDrawdown(age) {
         if (age < 65) return 0.04;
         if (age < 75) return 0.05;
         if (age < 80) return 0.06;
