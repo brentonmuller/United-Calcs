@@ -27,7 +27,7 @@
 <div class="card">
     <h2>🏗️ Cbus Retirement Income Projection</h2>
     <p style="font-size: 0.85em; color: #666; margin-bottom: 20px;">
-        Investment performance to 31 March 2026. Past performance is not a reliable indicator of future performance.
+        Investment performance to 31 May 2026. Past performance is not a reliable indicator of future performance.
     </p>
 
     <div class="grid">
@@ -65,7 +65,7 @@
             <label>Display Values As</label>
             <select id="displayMode">
                 <option value="nominal">Actual Dollars (Nominal)</option>
-                <option value="real">Today's Value (Real 2.5% Inflation)</option>
+                <option value="real">Inflation Adjusted (2.5% Inflation)</option>
             </select>
         </div>
     </div>
@@ -100,36 +100,36 @@
     const investmentData = {
   retired: {
     10: [
-        { name: "High Growth", rate: 0.1042 },
-        { name: "Growth", rate: 0.0862 },
-        { name: "Conservative Growth (default)", rate: 0.0678 },
+        { name: "High Growth", rate: 0.1050 },
+        { name: "Growth", rate: 0.0872 },
+        { name: "Conservative Growth (Default)", rate: 0.0686 },
         { name: "Conservative", rate: 0.0479 },
-        { name: "Cash", rate: 0.0235 }
+        { name: "Cash", rate: 0.0238 }
     ],
     3: [
-        { name: "Overseas Shares", rate: 0.1411 },
-        { name: "Indexed Diversified", rate: 0.1059 },
-        { name: "Growth Plus", rate: 0.0907 },
-        { name: "Australian Shares", rate: 0.0895 },
-        { name: "Diversified Fixed Interest", rate: 0.0453 },
-        { name: "Property", rate: 0.0307 }
+        { name: "Overseas Shares", rate: 0.1608 },
+        { name: "Indexed Diversified", rate: 0.1252 },
+        { name: "Growth Plus", rate: 0.1077 },
+        { name: "Australian Shares", rate: 0.1075 },
+        { name: "Diversified Fixed Interest", rate: 0.0518 },
+        { name: "Property", rate: 0.0485 }
     ]
   },
   ttr: {
     7: [
-        { name: "High Growth", rate: 0.0859 },
-        { name: "Growth", rate: 0.0703 },
-        { name: "Conservative Growth (default)", rate: 0.0531 },
-        { name: "Conservative", rate: 0.0374 },
-        { name: "Cash", rate: 0.0216 }
+        { name: "High Growth", rate: 0.0934 },
+        { name: "Growth", rate: 0.0763 },
+        { name: "Conservative Growth (Default)", rate: 0.0568 },
+        { name: "Conservative", rate: 0.0388 },
+        { name: "Cash", rate: 0.0221 }
     ],
     3: [
-        { name: "Overseas Shares", rate: 0.1310 },
-        { name: "Indexed Diversified", rate: 0.0938 },
-        { name: "Growth Plus", rate: 0.0843 },
-        { name: "Australian Shares", rate: 0.0815 },
-        { name: "Diversified Fixed Interest", rate: 0.0386 },
-        { name: "Property", rate: 0.0291 }
+        { name: "Overseas Shares", rate: 0.1481 },
+        { name: "Indexed Diversified", rate: 0.1104 },
+        { name: "Growth Plus", rate: 0.1002 },
+        { name: "Australian Shares", rate: 0.0970 },
+        { name: "Diversified Fixed Interest", rate: 0.0441 },
+        { name: "Property", rate: 0.0448 }
     ]
   }
 };
